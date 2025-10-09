@@ -16,11 +16,11 @@
                   <input
                     v-model="leftKeyword"
                     class="form-control form-control-sm"
-                    placeholder="검색(이름/부서/ID/직무)"
+                    placeholder="검색(ID/이름/부서/직무)"
                   />
                 </div>
                 <div class="p-0 flex-grow-1">
-                  <div class="table-responsive h-100">
+                  <div class="table-responsive code-inherit h-100">
                     <table class="table table-sm table-hover mb-0 align-middle">
                       <thead class="table-light position-sticky top-0">
                         <tr>
@@ -37,7 +37,7 @@
                               />
                             </div>
                           </th>
-                          <th style="width: 90px">UserId</th>
+                          <th class="text-nowrap">UserId</th>
                           <th>사용자명</th>
                           <th>부서명</th>
                           <th>직무</th>
@@ -56,7 +56,7 @@
                             </div>
                           </td>
                           <td>
-                            <span class="badge text-bg-secondary">#{{ u.userId }}</span>
+                            <span class="font-monospace text-body">{{ u.userId }}</span>
                           </td>
                           <td>{{ u.name }}</td>
                           <td>{{ u.dept }}</td>
@@ -94,7 +94,8 @@
                     <div>
                       <strong>{{ u.name }}</strong>
                       <div class="text-muted small">
-                        #{{ u.userId }} · {{ u.dept }} · {{ u.role }}
+                        <span class="font-monospace">{{ u.userId }}</span> · {{ u.dept }} ·
+                        {{ u.role }}
                       </div>
                     </div>
                     <button class="btn btn-outline-danger btn-sm" @click="uncheck(u.userId)">
@@ -128,14 +129,14 @@ export default {
   name: 'UserPopup',
   props: {
     users: { type: Array, required: true },
-    preselectedIds: { type: Array, default: () => [] },
+    preselectedIds: { type: Array, default: () => [] }, // ✔ 문자열 userId
 
     /* 사이즈/레이아웃 옵션 */
-    maxWidth: { type: [Number, String], default: 960 }, // px or css
-    marginX: { type: Number, default: 16 }, // 좌우 여백(px)
-    heightVh: { type: Number, default: 80 }, // 선호 높이(%)
-    minHeightPx: { type: Number, default: 560 }, // 최소 px
-    maxHeightPx: { type: Number, default: 720 }, // 최대 px
+    maxWidth: { type: [Number, String], default: 960 },
+    marginX: { type: Number, default: 16 },
+    heightVh: { type: Number, default: 80 },
+    minHeightPx: { type: Number, default: 560 },
+    maxHeightPx: { type: Number, default: 720 },
 
     /* 드래그 */
     draggable: { type: Boolean, default: true },
@@ -156,7 +157,7 @@ export default {
         ? this.users
         : this.users.filter(
             (u) =>
-              String(u.userId).includes(kw) ||
+              (u.userId || '').toLowerCase().includes(kw) ||
               (u.name || '').toLowerCase().includes(kw) ||
               (u.dept || '').toLowerCase().includes(kw) ||
               (u.role || '').toLowerCase().includes(kw)
@@ -320,7 +321,6 @@ export default {
     height: clamp(var(--min-h, 560px), var(--pref-dvh, 80dvh), var(--max-h, 720px));
   }
 }
-
 .modal-body {
   flex: 1 1 auto;
   overflow: auto;
@@ -331,8 +331,14 @@ export default {
     width: calc(100vw - 12px) !important;
   }
 }
-
 .modal-header {
   cursor: move;
+}
+
+/* 이 테이블 내부에서는 <code>색 대신 본문색으로 */
+.code-inherit code {
+  color: var(--bs-body-color) !important;
+  background: transparent;
+  padding: 0;
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <div class="container py-4">
     <div class="row g-3">
+      <!-- LEFT: 사용자 목록 -->
       <div class="col-12 col-lg-6">
         <div class="card shadow-sm">
           <div class="card-header d-flex align-items-center justify-content-between">
@@ -8,15 +9,15 @@
             <input
               v-model="keyword"
               class="form-control form-control-sm w-auto"
-              placeholder="검색: 이름/부서/ID/직무"
+              placeholder="검색: ID/이름/부서/직무"
             />
           </div>
           <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="table-responsive code-inherit">
               <table class="table table-hover table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <!-- ✔ 팝업과 동일한 마스터 체크박스 -->
+                    <!-- 마스터 체크박스 (현재 보이는 행 기준) -->
                     <th style="width: 44px">
                       <div class="form-check m-0 d-flex justify-content-center">
                         <input
@@ -32,16 +33,15 @@
                     </th>
 
                     <th
-                      class="user-select-none cursor-pointer text-nowrap"
+                      class="user-select-none text-nowrap"
                       scope="col"
-                      style="width: 100px"
                       @click="sortBy('userId')"
                       :aria-sort="ariaSort('userId')"
                     >
                       UserId <small class="text-muted">{{ sortIndicator('userId') }}</small>
                     </th>
                     <th
-                      class="user-select-none cursor-pointer text-nowrap"
+                      class="user-select-none text-nowrap"
                       scope="col"
                       @click="sortBy('name')"
                       :aria-sort="ariaSort('name')"
@@ -49,7 +49,7 @@
                       사용자명 <small class="text-muted">{{ sortIndicator('name') }}</small>
                     </th>
                     <th
-                      class="user-select-none cursor-pointer text-nowrap"
+                      class="user-select-none text-nowrap"
                       scope="col"
                       @click="sortBy('dept')"
                       :aria-sort="ariaSort('dept')"
@@ -57,7 +57,7 @@
                       부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
                     </th>
                     <th
-                      class="user-select-none cursor-pointer text-nowrap"
+                      class="user-select-none text-nowrap"
                       scope="col"
                       @click="sortBy('role')"
                       :aria-sort="ariaSort('role')"
@@ -68,7 +68,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="u in visibleUsers" :key="u.userId">
-                    <!-- ✔ 행 체크박스 (팝업과 동일) -->
+                    <!-- 행 체크박스 -->
                     <td>
                       <div class="form-check m-0 d-flex justify-content-center">
                         <input
@@ -82,7 +82,7 @@
                     </td>
 
                     <td>
-                      <span class="badge text-bg-secondary">{{ u.userId }}</span>
+                      <span class="font-monospace text-body">{{ u.userId }}</span>
                     </td>
                     <td>
                       <button class="btn btn-outline-primary btn-sm" @click="openPopup()">
@@ -99,6 +99,7 @@
         </div>
       </div>
 
+      <!-- RIGHT: 선택된 사용자 -->
       <div class="col-12 col-lg-6">
         <div class="card shadow-sm">
           <div class="card-header d-flex align-items-center justify-content-between">
@@ -118,7 +119,7 @@
       </div>
     </div>
 
-    <!-- 팝업은 유지 -->
+    <!-- 팝업 -->
     <UserPopup
       v-if="showPopup"
       v-bind="popupProps"
@@ -131,6 +132,7 @@
 <script>
 import UserPopup from '../components/UserPopup.vue'
 import SelectedUsers from '../components/SelectedUsers.vue'
+import { generateMockUsers } from '../utils/generateMockUsers.js'
 
 export default {
   name: 'UserPage',
@@ -142,31 +144,25 @@ export default {
       // 정렬(삼단 토글: none → asc → desc → none)
       sortKey: null, // null | 'userId' | 'name' | 'dept' | 'role'
       sortDir: 'none', // 'none' | 'asc' | 'desc'
-      users: [
-        { userId: 1001, name: '김하늘', dept: '플랫폼개발팀', role: 'Backend' },
-        { userId: 1002, name: '박서준', dept: '인프라팀', role: 'DevOps' },
-        { userId: 1003, name: '이지은', dept: 'QA팀', role: 'QA' },
-        { userId: 1004, name: '최민수', dept: '플랫폼개발팀', role: 'Frontend' },
-        { userId: 1005, name: '홍길동', dept: '경영지원', role: 'HR' },
-        { userId: 1006, name: '김지수', dept: '데이터팀', role: 'Data' },
-        { userId: 1007, name: '이도윤', dept: '보안팀', role: 'Security' },
-        { userId: 1008, name: '안유진', dept: '모바일팀', role: 'iOS' },
-        { userId: 1009, name: '한소희', dept: '디자인팀', role: 'Designer' },
-      ],
+      users: [], // db.json에서 로딩(실패 시 mock)
       selectedUsers: [],
-      // ✔ 페이지 테이블 체크 상태(팝업과 동일한 방식)
-      checkedIds: [],
+      checkedIds: [], // ✔ 문자열 userId 집합
     }
   },
+  async mounted() {
+    await this.loadUsers()
+    // 선택/체크 초기 동기화
+    this.checkedIds = this.selectedUsers.map((u) => u.userId)
+    this.$nextTick(this.updateMasterIndeterminatePage)
+  },
   computed: {
-    // 검색 + 정렬
     visibleUsers() {
       const kw = this.keyword.trim().toLowerCase()
       const filtered = !kw
         ? this.users.slice()
         : this.users.filter(
             (u) =>
-              String(u.userId).includes(kw) ||
+              (u.userId || '').toLowerCase().includes(kw) ||
               (u.name || '').toLowerCase().includes(kw) ||
               (u.dept || '').toLowerCase().includes(kw) ||
               (u.role || '').toLowerCase().includes(kw)
@@ -178,17 +174,14 @@ export default {
       const key = this.sortKey
       const collator = new Intl.Collator('ko', { numeric: true, sensitivity: 'base' })
 
-      return filtered.sort((a, b) => {
-        if (key === 'userId') return (a.userId - b.userId) * dir
-        return collator.compare(a[key], b[key]) * dir
-      })
+      return filtered.sort((a, b) => collator.compare(a[key], b[key]) * dir)
     },
 
     // 팝업에 전달할 프로퍼티 묶음
     popupProps() {
       return {
         users: this.users,
-        preselectedIds: this.selectedUsers.map((u) => u.userId),
+        preselectedIds: this.selectedUsers.map((u) => u.userId), // ✔ 문자열 userId
         maxWidth: 960,
         marginX: 16,
         heightVh: 80,
@@ -198,7 +191,7 @@ export default {
       }
     },
 
-    // ✔ 페이지 테이블용 마스터 체크 상태
+    // 페이지 테이블 마스터 체크 상태
     allCheckedPage() {
       if (!this.visibleUsers.length) return false
       const set = new Set(this.checkedIds)
@@ -206,43 +199,50 @@ export default {
     },
   },
   watch: {
-    // ✔ 페이지에서 체크박스 변경 → selectedUsers 동기화
+    // 체크 변경 → 선택된 사용자 동기화
     checkedIds(newIds) {
       const idset = new Set(newIds)
       this.selectedUsers = this.users.filter((u) => idset.has(u.userId))
       this.$nextTick(this.updateMasterIndeterminatePage)
     },
-    // 검색/정렬로 보이는 목록이 바뀔 때 indeterminate 갱신
+    // 검색/정렬 변경 시 indeterminate 갱신
     visibleUsers() {
       this.$nextTick(this.updateMasterIndeterminatePage)
     },
   },
-  mounted() {
-    // 초기 동기화
-    this.checkedIds = this.selectedUsers.map((u) => u.userId)
-    this.$nextTick(this.updateMasterIndeterminatePage)
-  },
   methods: {
+    async loadUsers() {
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}db.json`, { cache: 'no-store' })
+        if (!res.ok) throw new Error('db.json not found')
+        const json = await res.json()
+        this.users = Array.isArray(json) ? json : json.users || []
+      } catch (e) {
+        console.warn('db.json 로드 실패 → 목업 생성으로 대체합니다.', e)
+        this.users = generateMockUsers(100, { seed: 42 })
+      }
+    },
+
     openPopup() {
       this.showPopup = true
     },
 
-    // 팝업에서 확인 → selectedUsers, checkedIds 동기화
+    // 팝업 확인 → 선택/체크 동기화
     onConfirm(selectedList) {
       const map = new Map(this.selectedUsers.map((u) => [u.userId, u]))
       selectedList.forEach((u) => map.set(u.userId, u))
       this.selectedUsers = Array.from(map.values())
-      this.checkedIds = this.selectedUsers.map((u) => u.userId) // ✔ 동기화
+      this.checkedIds = this.selectedUsers.map((u) => u.userId)
       this.showPopup = false
     },
 
     removeSelected(userId) {
       this.selectedUsers = this.selectedUsers.filter((u) => u.userId !== userId)
-      this.checkedIds = this.checkedIds.filter((id) => id !== userId) // ✔ 동기화
+      this.checkedIds = this.checkedIds.filter((x) => x !== userId)
     },
     clearSelected() {
       this.selectedUsers = []
-      this.checkedIds = [] // ✔ 동기화
+      this.checkedIds = []
     },
 
     // 정렬 토글
@@ -267,7 +267,7 @@ export default {
       return this.sortDir === 'asc' ? 'ascending' : 'descending'
     },
 
-    // ✔ 마스터 체크박스(현재 보이는 행 기준)
+    // 마스터 체크박스(현재 보이는 행 기준)
     toggleAllVisiblePage() {
       const ids = this.visibleUsers.map((u) => u.userId)
       const allIncluded = ids.every((id) => this.checkedIds.includes(id))
@@ -287,3 +287,12 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* 이 테이블 내부에서는 <code>색 대신 본문색으로 */
+.code-inherit code {
+  color: var(--bs-body-color) !important;
+  background: transparent;
+  padding: 0;
+}
+</style>

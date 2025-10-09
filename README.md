@@ -18,8 +18,15 @@ wget -qO- https://get.volta.sh | bash
 
 ```bash
 
-# npm 설치 및 실행
+# 1) 의존성 설치 npm 라이브러리
 npm i
+
+# 2) 샘플 데이터 생성(100명, 시드 42)
+# seed: 7 → 다른 이름/배치로 다른 100명 생성
+# seed: 42 → 언제 실행해도 항상 같은 100명
+npm run make:db
+
+# 3) 개발서버 실행
 npm run dev
 ````
 
