@@ -1,10 +1,8 @@
 <template>
-  <!-- 컨트롤드 모달(부모가 v-if로 렌더링 제어) -->
   <div class="modal fade show" style="display: block" tabindex="-1" role="dialog" aria-modal="true">
-    <div class="modal-dialog" ref="dlg" :class="dialogSizeClass" :style="dialogInlineStyle">
-      <div class="modal-content shadow">
-        <!-- 드래그 핸들 -->
-        <div class="modal-header" ref="dragHandle" @pointerdown="onDragStart">
+    <div class="modal-dialog" ref="dlg" :style="dialogInlineStyle">
+      <div class="modal-content shadow" :style="modalContentStyle">
+        <div class="modal-header" @pointerdown="onDragStart">
           <h5 class="modal-title">사용자 선택</h5>
           <button type="button" class="btn-close" aria-label="Close" @click="onClose"></button>
         </div>
@@ -13,24 +11,32 @@
           <div class="row g-3">
             <!-- LEFT: 전체 사용자 목록 -->
             <div class="col-12 col-lg-6">
-              <div class="border rounded-3">
-                <div class="p-2 border-bottom d-flex align-items-center gap-2">
+              <div class="border rounded-3 h-100 d-flex flex-column">
+                <div class="p-2 border-bottom">
                   <input
                     v-model="leftKeyword"
                     class="form-control form-control-sm"
                     placeholder="검색(이름/부서/ID)"
                   />
-                  <button class="btn btn-outline-secondary btn-sm" @click="toggleAll">
-                    {{ allChecked ? '전체해제' : '전체선택' }}
-                  </button>
                 </div>
-                <div class="p-0" :style="`max-height:${bodyListMaxHeight}; overflow:auto`">
-                  <div class="table-responsive">
+                <div class="p-0 flex-grow-1">
+                  <div class="table-responsive h-100">
                     <table class="table table-sm table-hover mb-0 align-middle">
                       <thead class="table-light position-sticky top-0">
                         <tr>
-                          <th style="width: 36px">
-                            <input type="checkbox" :checked="allChecked" @change="toggleAll" />
+                          <th style="width: 44px">
+                            <!-- 마스터 체크박스: 현재 '필터된' 항목 전체 선택/해제 -->
+                            <div class="form-check m-0 d-flex justify-content-center">
+                              <input
+                                class="form-check-input"
+                                ref="master"
+                                type="checkbox"
+                                :checked="allChecked"
+                                :disabled="!filteredLeft.length"
+                                @change="toggleAllVisible"
+                                aria-label="현재 보이는 사용자 전체 선택/해제"
+                              />
+                            </div>
                           </th>
                           <th style="width: 90px">UserId</th>
                           <th>사용자명</th>
@@ -39,7 +45,16 @@
                       </thead>
                       <tbody>
                         <tr v-for="u in filteredLeft" :key="u.userId">
-                          <td><input type="checkbox" v-model="checkedIds" :value="u.userId" /></td>
+                          <td>
+                            <div class="form-check m-0 d-flex justify-content-center">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                v-model="checkedIds"
+                                :value="u.userId"
+                              />
+                            </div>
+                          </td>
                           <td>
                             <span class="badge text-bg-secondary">#{{ u.userId }}</span>
                           </td>
@@ -66,7 +81,7 @@
                     전체 선택해제
                   </button>
                 </div>
-                <div class="p-2" :style="`max-height:${bodyListMaxHeight}; overflow:auto`">
+                <div class="p-2 flex-grow-1 overflow-auto">
                   <div v-if="!preview.length" class="text-muted small py-2">
                     체크박스로 사용자를 선택하세요.
                   </div>
@@ -102,7 +117,6 @@
       </div>
     </div>
   </div>
-  <!-- 백드롭 -->
   <div class="modal-backdrop fade show"></div>
 </template>
 
@@ -112,19 +126,21 @@ export default {
   props: {
     users: { type: Array, required: true },
     preselectedIds: { type: Array, default: () => [] },
-    // 크기/레이아웃 옵션
-    maxWidth: { type: [Number, String], default: 960 }, // px 또는 css 값
+
+    /* 사이즈/레이아웃 옵션 */
+    maxWidth: { type: [Number, String], default: 960 }, // px or css
     marginX: { type: Number, default: 16 }, // 좌우 여백(px)
-    bodyMaxVh: { type: Number, default: 70 }, // 본문 리스트 max-height = min( bodyMaxVh vh, px )
-    preset: { type: String, default: 'lg' }, // 'sm' | 'md' | 'lg' | '' (부트스트랩 클래스)
-    // 드래그 옵션
+    heightVh: { type: Number, default: 80 }, // 선호 높이(%)
+    minHeightPx: { type: Number, default: 560 }, // 최소 px
+    maxHeightPx: { type: Number, default: 720 }, // 최대 px
+
+    /* 드래그 */
     draggable: { type: Boolean, default: true },
   },
   data() {
     return {
       leftKeyword: '',
       checkedIds: [...this.preselectedIds],
-      // drag state
       dragging: false,
       dragStart: { x: 0, y: 0 },
       dialogStart: { left: 0, top: 0 },
@@ -151,34 +167,42 @@ export default {
       const set = new Set(this.checkedIds)
       return this.filteredLeft.every((u) => set.has(u.userId))
     },
-    dialogSizeClass() {
-      // Bootstrap 사이징 클래스 선택
-      return {
-        'modal-sm': this.preset === 'sm',
-        'modal-lg': this.preset === 'lg',
-        'modal-md': this.preset === 'md', // 부트스트랩엔 modal-md가 없지만, 커스텀 대비
-      }
-    },
     dialogInlineStyle() {
-      // width: min(maxWidth, viewport - margin); transform 제거하고 top/left로 제어
       const max = typeof this.maxWidth === 'number' ? `${this.maxWidth}px` : this.maxWidth
       const side = `${this.marginX}px`
       return {
         position: 'fixed',
         margin: '0',
         transform: 'none',
-        width: `min(${max}, calc(100vw - ${side}*2))`,
+        width: `min(${max}, calc(100vw - (${side} * 2)))`,
         maxWidth: max,
       }
     },
-    bodyListMaxHeight() {
-      // 리스트 컨테이너의 최대 높이 (뷰포트 70vh 기본)
-      return `min(${this.bodyMaxVh}vh, 640px)`
+    modalContentStyle() {
+      return {
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        '--min-h': `${this.minHeightPx}px`,
+        '--max-h': `${this.maxHeightPx}px`,
+        '--pref-vh': `${this.heightVh}vh`,
+        '--pref-dvh': `${this.heightVh}dvh`,
+      }
+    },
+  },
+  watch: {
+    checkedIds() {
+      this.updateMasterIndeterminate()
+    },
+    filteredLeft() {
+      this.$nextTick(this.updateMasterIndeterminate)
     },
   },
   mounted() {
-    // 초기 중앙 배치(레이아웃 완료 후)
-    this.$nextTick(this.centerDialog)
+    this.$nextTick(() => {
+      this.centerDialog()
+      this.updateMasterIndeterminate()
+    })
     window.addEventListener('resize', this.centerDialog, { passive: true })
 
     if (this.draggable) {
@@ -194,7 +218,6 @@ export default {
     }
   },
   methods: {
-    // ---- modal control ----
     onClose() {
       this.$emit('close')
     },
@@ -206,19 +229,25 @@ export default {
       )
     },
 
-    // ---- selection helpers ----
-    toggleAll() {
+    toggleAllVisible() {
       const ids = this.filteredLeft.map((u) => u.userId)
       const allIncluded = ids.every((id) => this.checkedIds.includes(id))
       this.checkedIds = allIncluded
         ? this.checkedIds.filter((id) => !ids.includes(id))
         : Array.from(new Set([...this.checkedIds, ...ids]))
     },
+    updateMasterIndeterminate() {
+      const el = this.$refs.master
+      if (!el) return
+      const ids = new Set(this.filteredLeft.map((u) => u.userId))
+      let selected = 0
+      for (const id of this.checkedIds) if (ids.has(id)) selected++
+      el.indeterminate = selected > 0 && selected < ids.size
+    },
     uncheck(id) {
       this.checkedIds = this.checkedIds.filter((x) => x !== id)
     },
 
-    // ---- positioning ----
     centerDialog() {
       const dlg = this.$refs.dlg
       if (!dlg) return
@@ -226,12 +255,10 @@ export default {
       const vw = window.innerWidth
       const vh = window.innerHeight
       const left = Math.max(this.marginX, (vw - rect.width) / 2)
-      const top = Math.max(12, (vh - rect.height) / 2) // 위 여백 12px
+      const top = Math.max(12, (vh - rect.height) / 2)
       dlg.style.left = `${left}px`
       dlg.style.top = `${top}px`
     },
-
-    // ---- dragging ----
     onDragStart(e) {
       if (!this.draggable || e.button !== 0) return
       this.dragging = true
@@ -249,15 +276,12 @@ export default {
       const rect = dlg.getBoundingClientRect()
       const vw = window.innerWidth
       const vh = window.innerHeight
-
       let newLeft = this.dialogStart.left + dx
       let newTop = this.dialogStart.top + dy
       const maxLeft = vw - rect.width - this.marginX
       const maxTop = vh - rect.height - 12
-
       newLeft = Math.min(Math.max(this.marginX, newLeft), Math.max(this.marginX, maxLeft))
       newTop = Math.min(Math.max(12, newTop), Math.max(12, maxTop))
-
       dlg.style.left = `${newLeft}px`
       dlg.style.top = `${newTop}px`
     },
@@ -271,25 +295,40 @@ export default {
 </script>
 
 <style scoped>
-/* Bootstrap의 transform 기반 중앙정렬을 끄고 top/left로 제어 */
+/* transform 중앙정렬 해제 → top/left 직접 제어 */
 .modal.show .modal-dialog {
   transform: none !important;
 }
+.modal .modal-dialog {
+  position: fixed;
+  margin: 0 !important;
+}
 
-/* 작은 화면 보호: 너무 꽉 차지 않게 */
+/* dvh 우선, 폴백은 vh + clamp */
+.modal-content {
+  height: clamp(var(--min-h, 560px), var(--pref-vh, 80vh), var(--max-h, 720px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+@supports (height: 100dvh) {
+  .modal-content {
+    height: clamp(var(--min-h, 560px), var(--pref-dvh, 80dvh), var(--max-h, 720px));
+  }
+}
+
+.modal-body {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
 @media (max-width: 576px) {
   .modal .modal-dialog {
     width: calc(100vw - 12px) !important;
   }
 }
 
-/* 드래그 UX */
 .modal-header {
   cursor: move;
-}
-
-/* 본문 스크롤이 생겨도 헤더/푸터는 고정되게(부드러운 느낌) */
-.modal-content {
-  overflow: hidden;
 }
 </style>

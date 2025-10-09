@@ -187,7 +187,7 @@ export default {
       } else this.sortDir = 'asc'
     },
     sortIndicator(col) {
-      if (this.sortKey !== col || this.sortDir === 'none') return '↕'
+      if (this.sortKey !== col || this.sortDir === 'none') return ''
       return this.sortDir === 'asc' ? '▲' : '▼'
     },
     ariaSort(col) {
