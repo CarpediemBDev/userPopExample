@@ -19,10 +19,9 @@
                     <th
                       class="user-select-none cursor-pointer text-nowrap"
                       scope="col"
+                      style="width: 100px"
                       @click="sortBy('userId')"
                       :aria-sort="ariaSort('userId')"
-                      title="UserId로 정렬"
-                      style="width: 100px"
                     >
                       UserId <small class="text-muted">{{ sortIndicator('userId') }}</small>
                     </th>
@@ -31,7 +30,6 @@
                       scope="col"
                       @click="sortBy('name')"
                       :aria-sort="ariaSort('name')"
-                      title="사용자명으로 정렬"
                     >
                       사용자명 <small class="text-muted">{{ sortIndicator('name') }}</small>
                     </th>
@@ -40,7 +38,6 @@
                       scope="col"
                       @click="sortBy('dept')"
                       :aria-sort="ariaSort('dept')"
-                      title="부서명으로 정렬"
                     >
                       부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
                     </th>
@@ -86,8 +83,7 @@
 
     <UserPopup
       v-if="showPopup"
-      :users="users"
-      :preselected-ids="selectedUsers.map((u) => u.userId)"
+      v-bind="popupProps"
       @close="showPopup = false"
       @confirm="onConfirm"
     />
@@ -105,7 +101,7 @@ export default {
     return {
       showPopup: false,
       keyword: '',
-      // 정렬 상태(삼단 토글: none -> asc -> desc -> none)
+      // 정렬(삼단 토글: none → asc → desc → none)
       sortKey: null, // null | 'userId' | 'name' | 'dept'
       sortDir: 'none', // 'none' | 'asc' | 'desc'
       users: [
@@ -123,7 +119,6 @@ export default {
     }
   },
   computed: {
-    // 1) 검색 필터 → 2) (옵션) 정렬
     visibleUsers() {
       const kw = this.keyword.trim().toLowerCase()
       const filtered = !kw
@@ -135,10 +130,7 @@ export default {
               u.dept.toLowerCase().includes(kw)
           )
 
-      if (!this.sortKey || this.sortDir === 'none') {
-        // 정렬 없음: 원본 순서 유지
-        return filtered
-      }
+      if (!this.sortKey || this.sortDir === 'none') return filtered
 
       const dir = this.sortDir === 'asc' ? 1 : -1
       const key = this.sortKey
@@ -148,6 +140,20 @@ export default {
         if (key === 'userId') return (a.userId - b.userId) * dir
         return collator.compare(a[key], b[key]) * dir
       })
+    },
+
+    popupProps() {
+      return {
+        users: this.users,
+        preselectedIds: this.selectedUsers.map((u) => u.userId),
+
+        // --- UI 튜닝 옵션들 ---
+        maxWidth: 960, // 모달 최대 너비(px), 840~1024 권장
+        marginX: 16, // 좌우 여백(px)
+        bodyMaxVh: 70, // 본문 리스트 최대 높이(% of viewport height)
+        preset: 'lg', // 'sm' | 'lg' | ''  (Bootstrap 사이징 프리셋)
+        draggable: true, // 헤더 드래그로 이동 가능
+      }
     },
   },
   methods: {
@@ -167,7 +173,7 @@ export default {
       this.selectedUsers = []
     },
 
-    // 정렬: none -> asc -> desc -> none
+    // 정렬 토글
     sortBy(col) {
       if (this.sortKey !== col) {
         this.sortKey = col
