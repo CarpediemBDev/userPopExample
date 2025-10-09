@@ -1,15 +1,17 @@
 <template>
-  <div>
-    <div v-if="!users.length" class="text-muted small">오른쪽 화살표로 사용자를 추가하세요.</div>
-    <div v-for="u in users" :key="u.userId" class="d-flex align-items-center justify-content-between border rounded-3 p-2 mb-2">
-      <div>
-        <strong>{{ u.name }}</strong>
-        <div class="text-muted small">#{{ u.userId }} · {{ u.dept }}</div>
-      </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline-danger btn-sm" @click="$emit('remove', u.userId)">제거</button>
-      </div>
+  <div v-for="u in users" :key="u.userId" class="position-relative p-2 border rounded-3 mb-2">
+    <div>
+      <strong>{{ u.name }}</strong>
+      <div class="text-muted small">#{{ u.userId }} · {{ u.dept }}</div>
     </div>
+
+    <!-- 우상단 + 작은 X -->
+    <button
+      type="button"
+      class="btn-close position-absolute top-0 end-0 mt-2 me-2"
+      aria-label="Close"
+      @click="$emit('remove', u.userId)"
+    ></button>
   </div>
 </template>
 

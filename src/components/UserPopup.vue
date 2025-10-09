@@ -89,7 +89,7 @@
                   <div
                     v-for="u in preview"
                     :key="u.userId"
-                    class="d-flex align-items-center justify-content-between border rounded-3 p-2 mb-2"
+                    class="d-flex align-items-start justify-content-between border rounded-3 p-2 mb-2"
                   >
                     <div>
                       <strong>{{ u.name }}</strong>
@@ -98,9 +98,7 @@
                         {{ u.role }}
                       </div>
                     </div>
-                    <button class="btn btn-outline-danger btn-sm" @click="uncheck(u.userId)">
-                      제거
-                    </button>
+                    <button class="btn-close" @click="uncheck(u.userId)"></button>
                   </div>
                 </div>
               </div>
