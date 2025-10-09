@@ -49,7 +49,7 @@
                       <span class="badge text-bg-secondary">{{ u.userId }}</span>
                     </td>
                     <td>
-                      <button class="btn btn-outline-primary btn-sm" @click="openPopup(u)">
+                      <button class="btn btn-outline-primary btn-sm" @click="openPopup()">
                         {{ u.name }}
                       </button>
                     </td>
@@ -142,17 +142,23 @@ export default {
       })
     },
 
+    // 팝업에 전달할 프로퍼티 묶음
     popupProps() {
       return {
         users: this.users,
         preselectedIds: this.selectedUsers.map((u) => u.userId),
 
-        // --- UI 튜닝 옵션들 ---
-        maxWidth: 960, // 모달 최대 너비(px), 840~1024 권장
+        // 사이즈/레이아웃
+        maxWidth: 960, // 모달 최대 너비(px) — 필요시 840~1024로 조절
         marginX: 16, // 좌우 여백(px)
-        bodyMaxVh: 70, // 본문 리스트 최대 높이(% of viewport height)
-        preset: 'lg', // 'sm' | 'lg' | ''  (Bootstrap 사이징 프리셋)
-        draggable: true, // 헤더 드래그로 이동 가능
+
+        // 높이(clamp: min 560px, 선호 80dvh, max 720px)
+        heightVh: 80,
+        minHeightPx: 560,
+        maxHeightPx: 720,
+
+        // 드래그 허용 여부
+        draggable: true,
       }
     },
   },
