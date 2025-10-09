@@ -76,7 +76,7 @@
                       <strong>{{ u.name }}</strong>
                       <div class="text-muted small">#{{ u.userId }} · {{ u.dept }}</div>
                     </div>
-                    <button class="btn btn-outline-secondary btn-sm" @click="uncheck(u.userId)">
+                    <button class="btn btn-outline-danger btn-sm" @click="uncheck(u.userId)">
                       제거
                     </button>
                   </div>
@@ -133,8 +133,8 @@ export default {
     },
     allChecked() {
       if (!this.filteredLeft.length) return false
-      const ids = new Set(this.filteredLeft.map((u) => u.userId))
-      return this.checkedIds.length && this.checkedIds.every((id) => ids.has(id))
+      const set = new Set(this.checkedIds)
+      return this.filteredLeft.every((u) => set.has(u.userId))
     },
   },
   methods: {
