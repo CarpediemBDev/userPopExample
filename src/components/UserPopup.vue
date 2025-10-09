@@ -164,8 +164,8 @@ export default {
           )
     },
     preview() {
-      const set = new Set(this.checkedIds)
-      return this.users.filter((u) => set.has(u.userId))
+      const map = new Map(this.users.map((u) => [u.userId, u]))
+      return this.checkedIds.map((id) => map.get(id)).filter(Boolean)
     },
     allChecked() {
       if (!this.filteredLeft.length) return false

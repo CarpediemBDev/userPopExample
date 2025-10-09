@@ -13,11 +13,11 @@
             />
           </div>
           <div class="card-body p-0">
-            <div class="table-responsive code-inherit">
+            <div class="table-responsive">
               <table class="table table-hover table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <!-- 마스터 체크박스 (현재 보이는 행 기준) -->
+                    <!-- 마스터 체크박스(현재 보이는 행 기준) -->
                     <th style="width: 44px">
                       <div class="form-check m-0 d-flex justify-content-center">
                         <input
@@ -145,14 +145,11 @@ export default {
       sortKey: null, // null | 'userId' | 'name' | 'dept' | 'role'
       sortDir: 'none', // 'none' | 'asc' | 'desc'
       users: [], // db.json에서 로딩(실패 시 mock)
-      selectedUsers: [],
-      checkedIds: [], // ✔ 문자열 userId 집합
+      checkedIds: [], // ✔ 체크된 userId들을 "순서대로" 보관
     }
   },
   async mounted() {
     await this.loadUsers()
-    // 선택/체크 초기 동기화
-    this.checkedIds = this.selectedUsers.map((u) => u.userId)
     this.$nextTick(this.updateMasterIndeterminatePage)
   },
   computed: {
@@ -177,11 +174,17 @@ export default {
       return filtered.sort((a, b) => collator.compare(a[key], b[key]) * dir)
     },
 
-    // 팝업에 전달할 프로퍼티 묶음
+    // ✅ 체크 순서를 그대로 반영한 "선택된 사용자"
+    selectedUsers() {
+      const map = new Map(this.users.map((u) => [u.userId, u]))
+      return this.checkedIds.map((id) => map.get(id)).filter(Boolean)
+    },
+
+    // 팝업으로 넘길 프롭
     popupProps() {
       return {
         users: this.users,
-        preselectedIds: this.selectedUsers.map((u) => u.userId), // ✔ 문자열 userId
+        preselectedIds: this.checkedIds, // ✔ 이미 순서 보관 중
         maxWidth: 960,
         marginX: 16,
         heightVh: 80,
@@ -199,13 +202,10 @@ export default {
     },
   },
   watch: {
-    // 체크 변경 → 선택된 사용자 동기화
-    checkedIds(newIds) {
-      const idset = new Set(newIds)
-      this.selectedUsers = this.users.filter((u) => idset.has(u.userId))
+    // 선택/검색/정렬 변경 시 마스터 체크박스의 indeterminate만 갱신
+    checkedIds() {
       this.$nextTick(this.updateMasterIndeterminatePage)
     },
-    // 검색/정렬 변경 시 indeterminate 갱신
     visibleUsers() {
       this.$nextTick(this.updateMasterIndeterminatePage)
     },
@@ -227,21 +227,18 @@ export default {
       this.showPopup = true
     },
 
-    // 팝업 확인 → 선택/체크 동기화
+    // 팝업 확인 → "새로 체크된 id"만 뒤에 append (체크 순서 유지)
     onConfirm(selectedList) {
-      const map = new Map(this.selectedUsers.map((u) => [u.userId, u]))
-      selectedList.forEach((u) => map.set(u.userId, u))
-      this.selectedUsers = Array.from(map.values())
-      this.checkedIds = this.selectedUsers.map((u) => u.userId)
+      const addIds = selectedList.map((u) => u.userId)
+      const set = new Set(this.checkedIds)
+      for (const id of addIds) if (!set.has(id)) this.checkedIds.push(id)
       this.showPopup = false
     },
 
     removeSelected(userId) {
-      this.selectedUsers = this.selectedUsers.filter((u) => u.userId !== userId)
       this.checkedIds = this.checkedIds.filter((x) => x !== userId)
     },
     clearSelected() {
-      this.selectedUsers = []
       this.checkedIds = []
     },
 
@@ -287,12 +284,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-/* 이 테이블 내부에서는 <code>색 대신 본문색으로 */
-.code-inherit code {
-  color: var(--bs-body-color) !important;
-  background: transparent;
-  padding: 0;
-}
-</style>
