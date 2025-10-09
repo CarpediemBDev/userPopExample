@@ -16,7 +16,7 @@
                   <input
                     v-model="leftKeyword"
                     class="form-control form-control-sm"
-                    placeholder="검색(이름/부서/ID)"
+                    placeholder="검색(이름/부서/ID/직무)"
                   />
                 </div>
                 <div class="p-0 flex-grow-1">
@@ -25,7 +25,6 @@
                       <thead class="table-light position-sticky top-0">
                         <tr>
                           <th style="width: 44px">
-                            <!-- 마스터 체크박스: 현재 '필터된' 항목 전체 선택/해제 -->
                             <div class="form-check m-0 d-flex justify-content-center">
                               <input
                                 class="form-check-input"
@@ -41,6 +40,7 @@
                           <th style="width: 90px">UserId</th>
                           <th>사용자명</th>
                           <th>부서명</th>
+                          <th>직무</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -60,6 +60,7 @@
                           </td>
                           <td>{{ u.name }}</td>
                           <td>{{ u.dept }}</td>
+                          <td>{{ u.role }}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -92,7 +93,9 @@
                   >
                     <div>
                       <strong>{{ u.name }}</strong>
-                      <div class="text-muted small">#{{ u.userId }} · {{ u.dept }}</div>
+                      <div class="text-muted small">
+                        #{{ u.userId }} · {{ u.dept }} · {{ u.role }}
+                      </div>
                     </div>
                     <button class="btn btn-outline-danger btn-sm" @click="uncheck(u.userId)">
                       제거
@@ -154,8 +157,9 @@ export default {
         : this.users.filter(
             (u) =>
               String(u.userId).includes(kw) ||
-              u.name.toLowerCase().includes(kw) ||
-              u.dept.toLowerCase().includes(kw)
+              (u.name || '').toLowerCase().includes(kw) ||
+              (u.dept || '').toLowerCase().includes(kw) ||
+              (u.role || '').toLowerCase().includes(kw)
           )
     },
     preview() {

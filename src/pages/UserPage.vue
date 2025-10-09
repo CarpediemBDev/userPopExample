@@ -8,7 +8,7 @@
             <input
               v-model="keyword"
               class="form-control form-control-sm w-auto"
-              placeholder="검색: 이름/부서/ID"
+              placeholder="검색: 이름/부서/ID/직무"
             />
           </div>
           <div class="card-body p-0">
@@ -16,6 +16,21 @@
               <table class="table table-hover table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
+                    <!-- ✔ 팝업과 동일한 마스터 체크박스 -->
+                    <th style="width: 44px">
+                      <div class="form-check m-0 d-flex justify-content-center">
+                        <input
+                          class="form-check-input"
+                          ref="masterPage"
+                          type="checkbox"
+                          :checked="allCheckedPage"
+                          :disabled="!visibleUsers.length"
+                          @change="toggleAllVisiblePage"
+                          aria-label="현재 보이는 사용자 전체 선택/해제"
+                        />
+                      </div>
+                    </th>
+
                     <th
                       class="user-select-none cursor-pointer text-nowrap"
                       scope="col"
@@ -41,10 +56,31 @@
                     >
                       부서명 <small class="text-muted">{{ sortIndicator('dept') }}</small>
                     </th>
+                    <th
+                      class="user-select-none cursor-pointer text-nowrap"
+                      scope="col"
+                      @click="sortBy('role')"
+                      :aria-sort="ariaSort('role')"
+                    >
+                      직무 <small class="text-muted">{{ sortIndicator('role') }}</small>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="u in visibleUsers" :key="u.userId">
+                    <!-- ✔ 행 체크박스 (팝업과 동일) -->
+                    <td>
+                      <div class="form-check m-0 d-flex justify-content-center">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          v-model="checkedIds"
+                          :value="u.userId"
+                          aria-label="사용자 선택"
+                        />
+                      </div>
+                    </td>
+
                     <td>
                       <span class="badge text-bg-secondary">{{ u.userId }}</span>
                     </td>
@@ -54,6 +90,7 @@
                       </button>
                     </td>
                     <td>{{ u.dept }}</td>
+                    <td>{{ u.role }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -81,6 +118,7 @@
       </div>
     </div>
 
+    <!-- 팝업은 유지 -->
     <UserPopup
       v-if="showPopup"
       v-bind="popupProps"
@@ -102,23 +140,26 @@ export default {
       showPopup: false,
       keyword: '',
       // 정렬(삼단 토글: none → asc → desc → none)
-      sortKey: null, // null | 'userId' | 'name' | 'dept'
+      sortKey: null, // null | 'userId' | 'name' | 'dept' | 'role'
       sortDir: 'none', // 'none' | 'asc' | 'desc'
       users: [
-        { userId: 1001, name: '김하늘', dept: '플랫폼개발팀' },
-        { userId: 1002, name: '박서준', dept: '인프라팀' },
-        { userId: 1003, name: '이지은', dept: 'QA팀' },
-        { userId: 1004, name: '최민수', dept: '플랫폼개발팀' },
-        { userId: 1005, name: '홍길동', dept: '경영지원' },
-        { userId: 1006, name: '김지수', dept: '데이터팀' },
-        { userId: 1007, name: '이도윤', dept: '보안팀' },
-        { userId: 1008, name: '안유진', dept: '모바일팀' },
-        { userId: 1009, name: '한소희', dept: '디자인팀' },
+        { userId: 1001, name: '김하늘', dept: '플랫폼개발팀', role: 'Backend' },
+        { userId: 1002, name: '박서준', dept: '인프라팀', role: 'DevOps' },
+        { userId: 1003, name: '이지은', dept: 'QA팀', role: 'QA' },
+        { userId: 1004, name: '최민수', dept: '플랫폼개발팀', role: 'Frontend' },
+        { userId: 1005, name: '홍길동', dept: '경영지원', role: 'HR' },
+        { userId: 1006, name: '김지수', dept: '데이터팀', role: 'Data' },
+        { userId: 1007, name: '이도윤', dept: '보안팀', role: 'Security' },
+        { userId: 1008, name: '안유진', dept: '모바일팀', role: 'iOS' },
+        { userId: 1009, name: '한소희', dept: '디자인팀', role: 'Designer' },
       ],
       selectedUsers: [],
+      // ✔ 페이지 테이블 체크 상태(팝업과 동일한 방식)
+      checkedIds: [],
     }
   },
   computed: {
+    // 검색 + 정렬
     visibleUsers() {
       const kw = this.keyword.trim().toLowerCase()
       const filtered = !kw
@@ -126,8 +167,9 @@ export default {
         : this.users.filter(
             (u) =>
               String(u.userId).includes(kw) ||
-              u.name.toLowerCase().includes(kw) ||
-              u.dept.toLowerCase().includes(kw)
+              (u.name || '').toLowerCase().includes(kw) ||
+              (u.dept || '').toLowerCase().includes(kw) ||
+              (u.role || '').toLowerCase().includes(kw)
           )
 
       if (!this.sortKey || this.sortDir === 'none') return filtered
@@ -147,36 +189,60 @@ export default {
       return {
         users: this.users,
         preselectedIds: this.selectedUsers.map((u) => u.userId),
-
-        // 사이즈/레이아웃
-        maxWidth: 960, // 모달 최대 너비(px) — 필요시 840~1024로 조절
-        marginX: 16, // 좌우 여백(px)
-
-        // 높이(clamp: min 560px, 선호 80dvh, max 720px)
+        maxWidth: 960,
+        marginX: 16,
         heightVh: 80,
         minHeightPx: 560,
         maxHeightPx: 720,
-
-        // 드래그 허용 여부
         draggable: true,
       }
     },
+
+    // ✔ 페이지 테이블용 마스터 체크 상태
+    allCheckedPage() {
+      if (!this.visibleUsers.length) return false
+      const set = new Set(this.checkedIds)
+      return this.visibleUsers.every((u) => set.has(u.userId))
+    },
+  },
+  watch: {
+    // ✔ 페이지에서 체크박스 변경 → selectedUsers 동기화
+    checkedIds(newIds) {
+      const idset = new Set(newIds)
+      this.selectedUsers = this.users.filter((u) => idset.has(u.userId))
+      this.$nextTick(this.updateMasterIndeterminatePage)
+    },
+    // 검색/정렬로 보이는 목록이 바뀔 때 indeterminate 갱신
+    visibleUsers() {
+      this.$nextTick(this.updateMasterIndeterminatePage)
+    },
+  },
+  mounted() {
+    // 초기 동기화
+    this.checkedIds = this.selectedUsers.map((u) => u.userId)
+    this.$nextTick(this.updateMasterIndeterminatePage)
   },
   methods: {
     openPopup() {
       this.showPopup = true
     },
+
+    // 팝업에서 확인 → selectedUsers, checkedIds 동기화
     onConfirm(selectedList) {
       const map = new Map(this.selectedUsers.map((u) => [u.userId, u]))
       selectedList.forEach((u) => map.set(u.userId, u))
       this.selectedUsers = Array.from(map.values())
+      this.checkedIds = this.selectedUsers.map((u) => u.userId) // ✔ 동기화
       this.showPopup = false
     },
+
     removeSelected(userId) {
       this.selectedUsers = this.selectedUsers.filter((u) => u.userId !== userId)
+      this.checkedIds = this.checkedIds.filter((id) => id !== userId) // ✔ 동기화
     },
     clearSelected() {
       this.selectedUsers = []
+      this.checkedIds = [] // ✔ 동기화
     },
 
     // 정렬 토글
@@ -199,6 +265,24 @@ export default {
     ariaSort(col) {
       if (this.sortKey !== col || this.sortDir === 'none') return 'none'
       return this.sortDir === 'asc' ? 'ascending' : 'descending'
+    },
+
+    // ✔ 마스터 체크박스(현재 보이는 행 기준)
+    toggleAllVisiblePage() {
+      const ids = this.visibleUsers.map((u) => u.userId)
+      const allIncluded = ids.every((id) => this.checkedIds.includes(id))
+      this.checkedIds = allIncluded
+        ? this.checkedIds.filter((id) => !ids.includes(id))
+        : Array.from(new Set([...this.checkedIds, ...ids]))
+      this.$nextTick(this.updateMasterIndeterminatePage)
+    },
+    updateMasterIndeterminatePage() {
+      const el = this.$refs.masterPage
+      if (!el) return
+      const visibleIds = new Set(this.visibleUsers.map((u) => u.userId))
+      let selected = 0
+      for (const id of this.checkedIds) if (visibleIds.has(id)) selected++
+      el.indeterminate = selected > 0 && selected < visibleIds.size
     },
   },
 }
