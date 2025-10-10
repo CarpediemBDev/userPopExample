@@ -8,24 +8,22 @@ toastMsg('기본',       { type: 'dark'    })  // 진한 회색(검정톤)
 
  */
 let container = null
-
 // 토스트 컨테이너 생성
-function getToastContainer() {
+export function getToastContainer() {
   if (container) return container
   container = document.createElement('div')
   container.className = 'toast-container position-fixed bottom-0 end-0 p-3'
-  container.style.zIndex = '2000' // 모달(1055)보다 위
+  container.style.zIndex = '2000'
   document.body.appendChild(container)
   return container
 }
-
 // 토스트 생성
-function showToast(text, { type = 'success', duration = 2000 } = {}) {
+export function showToast(text, { type = 'success', duration = 2000 } = {}) {
   const c = getToastContainer()
 
   const el = document.createElement('div')
   el.className = `toast text-bg-${type} border-0 show mb-2`
-  el.style.display = 'block' // BS JS 없이도 보이게
+  el.style.display = 'block'
   el.setAttribute('role', 'alert')
   el.setAttribute('aria-live', 'assertive')
   el.setAttribute('aria-atomic', 'true')
@@ -52,12 +50,4 @@ function showToast(text, { type = 'success', duration = 2000 } = {}) {
     if (timer) clearTimeout(timer)
     el.remove()
   })
-}
-
-// 🔌 아주 단순한 전역 플러그인: this.$toast / inject('toast')
-export default {
-  install(app) {
-    app.config.globalProperties.$toast = (text, opts) => showToast(text, opts)
-    app.provide('toast', (text, opts) => showToast(text, opts))
-  },
 }
