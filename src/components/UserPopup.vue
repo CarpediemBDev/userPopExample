@@ -269,15 +269,15 @@ export default {
       const rect = this.$refs.dlg.getBoundingClientRect()
       this.dragStart = { x: e.clientX, y: e.clientY }
       this.dialogStart = { left: rect.left, top: rect.top }
-      document.body.style.userSelect = 'none'
+      document.body.style.userSelect = 'none' //드래그 중 텍스트 선택 방지
     },
     onDragMove(e) {
       if (!this.dragging) return
       e.preventDefault()
       const dx = e.clientX - this.dragStart.x
       const dy = e.clientY - this.dragStart.y
-      const dlg = this.$refs.dlg
-      const rect = dlg.getBoundingClientRect()
+      const dlg = this.$refs.dlg //
+      const rect = dlg.getBoundingClientRect() // 현재 화면 위치 및 크기 정보 획득
       const vw = window.innerWidth
       const vh = window.innerHeight
       let newLeft = this.dialogStart.left + dx
@@ -286,6 +286,8 @@ export default {
       const maxTop = vh - rect.height - 12
       newLeft = Math.min(Math.max(this.marginX, newLeft), Math.max(this.marginX, maxLeft))
       newTop = Math.min(Math.max(12, newTop), Math.max(12, maxTop))
+
+      // 화면 밖으로 나가지 않도록 제한
       dlg.style.left = `${newLeft}px`
       dlg.style.top = `${newTop}px`
     },

@@ -185,11 +185,12 @@ export default {
       return {
         users: this.users,
         preselectedIds: this.checkedIds, // ✔ 이미 순서 보관 중
-        maxWidth: 960,
-        marginX: 16,
-        heightVh: 80,
-        minHeightPx: 560,
-        maxHeightPx: 720,
+        maxWidth: 960, // 가로폭 상한
+        marginX: 16, // 좌우 여백
+        heightVh: 80, // 화면 높이 대비 비율
+        minHeightPx: 560, // 너무 작게 줄어드는 것 방지
+        maxHeightPx: 720, // 너무 크게 늘어나는 것 방지
+        // 드래그 가능 여부 (true로 설정 시 헤더에서 드래그 가능
         draggable: true,
       }
     },
