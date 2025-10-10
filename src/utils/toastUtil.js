@@ -9,7 +9,7 @@ toastMsg('기본',       { type: 'dark'    })  // 진한 회색(검정톤)
  */
 let container = null
 // 토스트 컨테이너 생성
-export function getToastContainer() {
+function getToastContainer() {
   if (container) return container
   container = document.createElement('div')
   container.className = 'toast-container position-fixed bottom-0 end-0 p-3'
