@@ -164,13 +164,14 @@ export default {
     },
     popupProps() {
       return {
-        users: this.users,
         preselectedIds: this.checkedIds,
-        maxWidth: 960,
-        marginX: 16,
-        heightVh: 80,
-        minHeightPx: 560,
-        maxHeightPx: 720,
+        maxWidth: 960, // 가로폭 상한
+        marginX: 16, // 좌우 여백
+        heightVh: 80, // 화면 높이 대비
+        // 너무 작게 줄어드는 것 방지
+        minHeightPx: 560, // 최소 높이
+        maxHeightPx: 720, // 최대 높이
+        // 드래그 가능 여부 (true로 설정 시 헤더에서 드래그 가능)
         draggable: true,
       }
     },

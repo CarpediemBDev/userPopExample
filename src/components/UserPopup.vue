@@ -71,7 +71,6 @@
 
             <!-- RIGHT: 선택 미리보기 (공통 컴포넌트) -->
             <div class="col-12 col-lg-6 d-flex flex-column">
-              <!-- SelectedUsers 자체가 헤더+바디+스크롤을 모두 포함하고 h-100로 꽉 채움 -->
               <SelectedUsers
                 class="flex-grow-1"
                 :users="preview"
@@ -99,27 +98,33 @@
 
 <script>
 import SelectedUsers from './SelectedUsers.vue'
+import { generateMockUsers } from '../utils/generateMockUsers.js'
 
 export default {
   name: 'UserPopup',
   components: { SelectedUsers },
   props: {
-    users: { type: Array, required: true },
     preselectedIds: { type: Array, default: () => [] },
+
+    /* 사이즈/레이아웃 옵션 */
     maxWidth: { type: [Number, String], default: 960 },
     marginX: { type: Number, default: 16 },
     heightVh: { type: Number, default: 80 },
     minHeightPx: { type: Number, default: 560 },
     maxHeightPx: { type: Number, default: 720 },
+
+    /* 드래그 */
     draggable: { type: Boolean, default: true },
   },
   data() {
     return {
+      users: [], // ← 여기서 자체 보관
       leftKeyword: '',
       checkedIds: [...this.preselectedIds],
       dragging: false,
       dragStart: { x: 0, y: 0 },
       dialogStart: { left: 0, top: 0 },
+      loading: true,
     }
   },
   computed: {
@@ -176,6 +181,7 @@ export default {
     },
   },
   mounted() {
+    this.loadUsers()
     this.$nextTick(() => {
       this.centerDialog()
       this.updateMasterIndeterminate()
@@ -195,6 +201,21 @@ export default {
     }
   },
   methods: {
+    async loadUsers() {
+      this.loading = true
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}db.json`, { cache: 'no-store' })
+        if (!res.ok) throw new Error('db.json not found')
+        const json = await res.json()
+        this.users = Array.isArray(json) ? json : json.users || []
+      } catch (e) {
+        console.warn('[Popup] db.json 로드 실패 → 목업으로 대체', e)
+        this.users = generateMockUsers(100, { seed: 43 })
+      } finally {
+        this.loading = false
+      }
+    },
+
     onClose() {
       this.$emit('close')
     },
@@ -205,6 +226,7 @@ export default {
         this.users.filter((u) => set.has(u.userId))
       )
     },
+
     toggleAllVisible() {
       const ids = this.filteredLeft.map((u) => u.userId)
       const allIncluded = ids.every((id) => this.checkedIds.includes(id))
@@ -259,6 +281,8 @@ export default {
       const maxTop = vh - rect.height - 12
       newLeft = Math.min(Math.max(this.marginX, newLeft), Math.max(this.marginX, maxLeft))
       newTop = Math.min(Math.max(12, newTop), Math.max(12, maxTop))
+
+      // 화면 밖으로 나가지 않도록 제한
       dlg.style.left = `${newLeft}px`
       dlg.style.top = `${newTop}px`
     },
