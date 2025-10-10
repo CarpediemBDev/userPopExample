@@ -251,6 +251,7 @@ export default {
       this.checkedIds = this.checkedIds.filter((x) => x !== id)
     },
 
+    /* Modal 중앙정렬 */
     centerDialog() {
       const dlg = this.$refs.dlg
       if (!dlg) return
@@ -298,15 +299,6 @@ export default {
 </script>
 
 <style scoped>
-/* transform 중앙정렬 해제 → top/left 직접 제어 */
-.modal.show .modal-dialog {
-  transform: none !important;
-}
-.modal .modal-dialog {
-  position: fixed;
-  margin: 0 !important;
-}
-
 /* dvh 우선, 폴백은 vh + clamp */
 .modal-content {
   height: clamp(var(--min-h, 560px), var(--pref-vh, 80vh), var(--max-h, 720px));
