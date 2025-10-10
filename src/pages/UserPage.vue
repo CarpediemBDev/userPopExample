@@ -164,7 +164,7 @@ export default {
     },
     popupProps() {
       return {
-        preselectedIds: this.checkedIds,
+        //preselectedIds: this.checkedIds, // 미리 선택된 ID 목록 (팝업 내 체크박스에 반영됨)
         maxWidth: 960, // 가로폭 상한
         marginX: 16, // 좌우 여백
         heightVh: 80, // 화면 높이 대비
