@@ -69,42 +69,17 @@
               </div>
             </div>
 
-            <!-- RIGHT: 선택 미리보기 -->
-            <div class="col-12 col-lg-6">
-              <div class="border rounded-3 h-100 d-flex flex-column">
-                <div class="p-2 border-bottom d-flex justify-content-between align-items-center">
-                  <small class="text-muted">선택 {{ preview.length }}명</small>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    :disabled="!checkedIds.length"
-                    @click="checkedIds = []"
-                  >
-                    전체 선택해제
-                  </button>
-                </div>
-                <div class="p-2 flex-grow-1 overflow-auto">
-                  <div v-if="!preview.length" class="text-muted small py-2">
-                    체크박스로 사용자를 선택하세요.
-                  </div>
-                  <div
-                    v-for="u in preview"
-                    :key="u.userId"
-                    class="d-flex align-items-start justify-content-between border rounded-3 p-2 mb-2"
-                  >
-                    <div>
-                      <strong>{{ u.name }}</strong>
-                      <div class="text-muted small">
-                        <span class="font-monospace">{{ u.userId }}</span> · {{ u.dept }} ·
-                        {{ u.role }}
-                      </div>
-                    </div>
-                    <button class="btn-close" @click="uncheck(u.userId)"></button>
-                  </div>
-                </div>
-              </div>
+            <!-- RIGHT: 선택 미리보기 (공통 컴포넌트) -->
+            <div class="col-12 col-lg-6 d-flex flex-column">
+              <!-- SelectedUsers 자체가 헤더+바디+스크롤을 모두 포함하고 h-100로 꽉 채움 -->
+              <SelectedUsers
+                class="flex-grow-1"
+                :users="preview"
+                @remove="uncheck"
+                @clear="checkedIds = []"
+              />
             </div>
           </div>
-          <!-- /row -->
         </div>
 
         <div class="modal-footer">
@@ -123,20 +98,19 @@
 </template>
 
 <script>
+import SelectedUsers from './SelectedUsers.vue'
+
 export default {
   name: 'UserPopup',
+  components: { SelectedUsers },
   props: {
     users: { type: Array, required: true },
-    preselectedIds: { type: Array, default: () => [] }, // ✔ 문자열 userId
-
-    /* 사이즈/레이아웃 옵션 */
+    preselectedIds: { type: Array, default: () => [] },
     maxWidth: { type: [Number, String], default: 960 },
     marginX: { type: Number, default: 16 },
     heightVh: { type: Number, default: 80 },
     minHeightPx: { type: Number, default: 560 },
     maxHeightPx: { type: Number, default: 720 },
-
-    /* 드래그 */
     draggable: { type: Boolean, default: true },
   },
   data() {
@@ -195,7 +169,7 @@ export default {
   },
   watch: {
     checkedIds() {
-      this.updateMasterIndeterminate()
+      this.$nextTick(this.updateMasterIndeterminate)
     },
     filteredLeft() {
       this.$nextTick(this.updateMasterIndeterminate)
@@ -231,7 +205,6 @@ export default {
         this.users.filter((u) => set.has(u.userId))
       )
     },
-
     toggleAllVisible() {
       const ids = this.filteredLeft.map((u) => u.userId)
       const allIncluded = ids.every((id) => this.checkedIds.includes(id))
@@ -269,15 +242,15 @@ export default {
       const rect = this.$refs.dlg.getBoundingClientRect()
       this.dragStart = { x: e.clientX, y: e.clientY }
       this.dialogStart = { left: rect.left, top: rect.top }
-      document.body.style.userSelect = 'none' //드래그 중 텍스트 선택 방지
+      document.body.style.userSelect = 'none'
     },
     onDragMove(e) {
       if (!this.dragging) return
       e.preventDefault()
       const dx = e.clientX - this.dragStart.x
       const dy = e.clientY - this.dragStart.y
-      const dlg = this.$refs.dlg //
-      const rect = dlg.getBoundingClientRect() // 현재 화면 위치 및 크기 정보 획득
+      const dlg = this.$refs.dlg
+      const rect = dlg.getBoundingClientRect()
       const vw = window.innerWidth
       const vh = window.innerHeight
       let newLeft = this.dialogStart.left + dx
@@ -286,8 +259,6 @@ export default {
       const maxTop = vh - rect.height - 12
       newLeft = Math.min(Math.max(this.marginX, newLeft), Math.max(this.marginX, maxLeft))
       newTop = Math.min(Math.max(12, newTop), Math.max(12, maxTop))
-
-      // 화면 밖으로 나가지 않도록 제한
       dlg.style.left = `${newLeft}px`
       dlg.style.top = `${newTop}px`
     },

@@ -17,7 +17,6 @@
               <table class="table table-hover table-sm mb-0 align-middle">
                 <thead class="table-light">
                   <tr>
-                    <!-- 마스터 체크박스(현재 보이는 행 기준) -->
                     <th style="width: 44px">
                       <div class="form-check m-0 d-flex justify-content-center">
                         <input
@@ -31,7 +30,6 @@
                         />
                       </div>
                     </th>
-
                     <th
                       class="user-select-none text-nowrap"
                       scope="col"
@@ -68,7 +66,6 @@
                 </thead>
                 <tbody>
                   <tr v-for="u in visibleUsers" :key="u.userId">
-                    <!-- 행 체크박스 -->
                     <td>
                       <div class="form-check m-0 d-flex justify-content-center">
                         <input
@@ -80,7 +77,6 @@
                         />
                       </div>
                     </td>
-
                     <td>
                       <span class="font-monospace text-body">{{ u.userId }}</span>
                     </td>
@@ -99,23 +95,14 @@
         </div>
       </div>
 
-      <!-- RIGHT: 선택된 사용자 -->
-      <div class="col-12 col-lg-6">
-        <div class="card shadow-sm">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <h2 class="h5 mb-0">선택된 사용자</h2>
-            <button
-              v-if="selectedUsers.length"
-              class="btn btn-outline-secondary btn-sm"
-              @click="clearSelected"
-            >
-              초기화
-            </button>
-          </div>
-          <div class="card-body">
-            <SelectedUsers :users="selectedUsers" @remove="removeSelected" />
-          </div>
-        </div>
+      <!-- RIGHT: 선택된 사용자 (공통 컴포넌트만 사용) -->
+      <div class="col-12 col-lg-6 d-flex flex-column">
+        <SelectedUsers
+          class="flex-grow-1"
+          :users="selectedUsers"
+          @remove="removeSelected"
+          @clear="clearSelected"
+        />
       </div>
     </div>
 
@@ -141,11 +128,10 @@ export default {
     return {
       showPopup: false,
       keyword: '',
-      // 정렬(삼단 토글: none → asc → desc → none)
-      sortKey: null, // null | 'userId' | 'name' | 'dept' | 'role'
+      sortKey: null, // 'userId' | 'name' | 'dept' | 'role' | null
       sortDir: 'none', // 'none' | 'asc' | 'desc'
-      users: [], // db.json에서 로딩(실패 시 mock)
-      checkedIds: [], // ✔ 체크된 userId들을 "순서대로" 보관
+      users: [],
+      checkedIds: [], // 선택 순서 보존
     }
   },
   async mounted() {
@@ -170,32 +156,24 @@ export default {
       const dir = this.sortDir === 'asc' ? 1 : -1
       const key = this.sortKey
       const collator = new Intl.Collator('ko', { numeric: true, sensitivity: 'base' })
-
       return filtered.sort((a, b) => collator.compare(a[key], b[key]) * dir)
     },
-
-    // ✅ 체크 순서를 그대로 반영한 "선택된 사용자"
     selectedUsers() {
       const map = new Map(this.users.map((u) => [u.userId, u]))
       return this.checkedIds.map((id) => map.get(id)).filter(Boolean)
     },
-
-    // 팝업으로 넘길 프롭
     popupProps() {
       return {
         users: this.users,
-        preselectedIds: this.checkedIds, // ✔ 이미 순서 보관 중
-        maxWidth: 960, // 가로폭 상한
-        marginX: 16, // 좌우 여백
-        heightVh: 80, // 화면 높이 대비 비율
-        minHeightPx: 560, // 너무 작게 줄어드는 것 방지
-        maxHeightPx: 720, // 너무 크게 늘어나는 것 방지
-        // 드래그 가능 여부 (true로 설정 시 헤더에서 드래그 가능
+        preselectedIds: this.checkedIds,
+        maxWidth: 960,
+        marginX: 16,
+        heightVh: 80,
+        minHeightPx: 560,
+        maxHeightPx: 720,
         draggable: true,
       }
     },
-
-    // 페이지 테이블 마스터 체크 상태
     allCheckedPage() {
       if (!this.visibleUsers.length) return false
       const set = new Set(this.checkedIds)
@@ -203,7 +181,6 @@ export default {
     },
   },
   watch: {
-    // 선택/검색/정렬 변경 시 마스터 체크박스의 indeterminate만 갱신
     checkedIds() {
       this.$nextTick(this.updateMasterIndeterminatePage)
     },
@@ -223,19 +200,15 @@ export default {
         this.users = generateMockUsers(100, { seed: 42 })
       }
     },
-
     openPopup() {
       this.showPopup = true
     },
-
-    // 팝업 확인 → "새로 체크된 id"만 뒤에 append (체크 순서 유지)
     onConfirm(selectedList) {
       const addIds = selectedList.map((u) => u.userId)
       const set = new Set(this.checkedIds)
       for (const id of addIds) if (!set.has(id)) this.checkedIds.push(id)
       this.showPopup = false
     },
-
     removeSelected(userId) {
       this.checkedIds = this.checkedIds.filter((x) => x !== userId)
     },
@@ -265,7 +238,7 @@ export default {
       return this.sortDir === 'asc' ? 'ascending' : 'descending'
     },
 
-    // 마스터 체크박스(현재 보이는 행 기준)
+    // 마스터 체크(보이는 행 기준)
     toggleAllVisiblePage() {
       const ids = this.visibleUsers.map((u) => u.userId)
       const allIncluded = ids.every((id) => this.checkedIds.includes(id))
