@@ -7,44 +7,57 @@ toastMsg('주의',       { type: 'warning' })  // 노랑
 toastMsg('기본',       { type: 'dark'    })  // 진한 회색(검정톤)
 
  */
-let toastContainer = null
+let container = null
 
-export function toastMsg(text, { type = 'success', duration = 2000 } = {}) {
-  if (!toastContainer) {
-    toastContainer = document.createElement('div')
-    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3'
-    toastContainer.style.zIndex = '2000' // 모달(1055)보다 크게
-    document.body.appendChild(toastContainer)
-  }
+// 토스트 컨테이너 생성
+function getToastContainer() {
+  if (container) return container
+  container = document.createElement('div')
+  container.className = 'toast-container position-fixed bottom-0 end-0 p-3'
+  container.style.zIndex = '2000' // 모달(1055)보다 위
+  document.body.appendChild(container)
+  return container
+}
+
+// 토스트 생성
+function showToast(text, { type = 'success', duration = 2000 } = {}) {
+  const c = getToastContainer()
 
   const el = document.createElement('div')
   el.className = `toast text-bg-${type} border-0 show mb-2`
-  el.style.display = 'block' // 혹시 BS 플러그인 없이도 보이게
+  el.style.display = 'block' // BS JS 없이도 보이게
   el.setAttribute('role', 'alert')
   el.setAttribute('aria-live', 'assertive')
   el.setAttribute('aria-atomic', 'true')
 
-  // XSS를 피하려면 textContent로 넣자
+  const row = document.createElement('div')
+  row.className = 'd-flex'
+
   const body = document.createElement('div')
   body.className = 'toast-body'
-  body.textContent = text // textContent로 넣어야 XSS 공격 방어 가능
+  body.textContent = String(text ?? '') // XSS 안전
 
   const close = document.createElement('button')
   close.type = 'button'
-  close.className = 'btn-close btn-close-white me-2 m-auto' // 간단히 흰색으로 고정
+  close.className = 'btn-close btn-close-white me-2 m-auto'
   close.setAttribute('aria-label', 'Close')
 
-  const row = document.createElement('div')
-  row.className = 'd-flex'
   row.appendChild(body)
   row.appendChild(close)
   el.appendChild(row)
+  c.appendChild(el)
 
   const timer = duration > 0 ? setTimeout(() => el.remove(), duration) : null
   close.addEventListener('click', () => {
     if (timer) clearTimeout(timer)
     el.remove()
   })
+}
 
-  toastContainer.appendChild(el)
+// 🔌 아주 단순한 전역 플러그인: this.$toast / inject('toast')
+export default {
+  install(app) {
+    app.config.globalProperties.$toast = (text, opts) => showToast(text, opts)
+    app.provide('toast', (text, opts) => showToast(text, opts))
+  },
 }

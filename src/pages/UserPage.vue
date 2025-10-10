@@ -120,7 +120,7 @@
 import UserPopup from '../components/UserPopup.vue'
 import SelectedUsers from '../components/SelectedUsers.vue'
 import { generateMockUsers } from '../utils/generateMockUsers.js'
-import { toastMsg } from '../utils/toastUtil.js'
+//import { toastMsg } from '../utils/toastUtil.js'
 
 export default {
   name: 'UserPage',
@@ -210,7 +210,7 @@ export default {
       const set = new Set(this.checkedIds)
       for (const id of addIds) if (!set.has(id)) this.checkedIds.push(id)
       this.showPopup = false
-      toastMsg(
+      this.$toast(
         selectedList.length > 0 ? `${selectedList.length}명 추가됨` : '추가된 항목이 없습니다',
         {
           type: selectedList.length > 0 ? 'success' : 'secondary',
