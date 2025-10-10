@@ -103,6 +103,7 @@ import { generateMockUsers } from '../utils/generateMockUsers.js'
 export default {
   name: 'UserPopup',
   components: { SelectedUsers },
+  emits: ['close', 'confirm'],
   props: {
     preselectedIds: { type: Array, default: () => [] },
 
