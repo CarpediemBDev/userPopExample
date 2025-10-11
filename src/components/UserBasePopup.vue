@@ -19,125 +19,64 @@
                     placeholder="검색(ID/이름/부서/직무)"
                   />
                 </div>
-                <PagedList :items="filteredLeft" :pageSize="leftPageSize" v-model:page="leftPage">
-                  <template #default="{ items, page, totalPages, goPrev, goNext }">
-                    <div class="p-0 flex-grow-1">
-                      <div class="table-responsive code-inherit h-100">
-                        <table class="table table-sm table-hover mb-0 align-middle">
-                          <thead class="table-light position-sticky top-0">
-                            <tr>
-                              <th style="width: 44px">
-                                <div class="form-check m-0 d-flex justify-content-center">
-                                  <input
-                                    class="form-check-input"
-                                    ref="master"
-                                    type="checkbox"
-                                    :checked="allChecked"
-                                    :disabled="!filteredLeft.length"
-                                    @change="toggleAllVisible"
-                                    aria-label="현재 보이는 사용자 전체 선택/해제"
-                                  />
-                                </div>
-                              </th>
-                              <th class="text-nowrap">UserId</th>
-                              <th>사용자명</th>
-                              <th>부서명</th>
-                              <th>직무</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="u in items" :key="u.userId">
-                              <td>
-                                <div class="form-check m-0 d-flex justify-content-center">
-                                  <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    v-model="checkedIds"
-                                    :value="u.userId"
-                                  />
-                                </div>
-                              </td>
-                              <td>
-                                <span class="font-monospace text-body">{{ u.userId }}</span>
-                              </td>
-                              <td>{{ u.name }}</td>
-                              <td>{{ u.dept }}</td>
-                              <td>{{ u.role }}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-
-                      <div class="p-2 border-top d-flex justify-content-between align-items-center">
-                        <div class="small text-muted">총 {{ filteredLeft.length }}건</div>
-                        <div>
-                          <button
-                            class="btn btn-sm btn-outline-secondary me-1"
-                            :disabled="page <= 1"
-                            @click="goPrev"
-                          >
-                            이전
-                          </button>
-                          <span class="mx-1">{{ page }} / {{ totalPages }}</span>
-                          <button
-                            class="btn btn-sm btn-outline-secondary ms-1"
-                            :disabled="page >= totalPages"
-                            @click="goNext"
-                          >
-                            다음
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </PagedList>
+                <div class="p-0 flex-grow-1">
+                  <div class="table-responsive code-inherit h-100">
+                    <table class="table table-sm table-hover mb-0 align-middle">
+                      <thead class="table-light position-sticky top-0">
+                        <tr>
+                          <th style="width: 44px">
+                            <div class="form-check m-0 d-flex justify-content-center">
+                              <input
+                                class="form-check-input"
+                                ref="master"
+                                type="checkbox"
+                                :checked="allChecked"
+                                :disabled="!filteredLeft.length"
+                                @change="toggleAllVisible"
+                                aria-label="현재 보이는 사용자 전체 선택/해제"
+                              />
+                            </div>
+                          </th>
+                          <th class="text-nowrap">UserId</th>
+                          <th>사용자명</th>
+                          <th>부서명</th>
+                          <th>직무</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="u in filteredLeft" :key="u.userId">
+                          <td>
+                            <div class="form-check m-0 d-flex justify-content-center">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                v-model="checkedIds"
+                                :value="u.userId"
+                              />
+                            </div>
+                          </td>
+                          <td>
+                            <span class="font-monospace text-body">{{ u.userId }}</span>
+                          </td>
+                          <td>{{ u.name }}</td>
+                          <td>{{ u.dept }}</td>
+                          <td>{{ u.role }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- RIGHT: 선택 미리보기 (공통 컴포넌트) -->
             <div class="col-12 col-lg-6 d-flex flex-column">
-              <div class="p-0 flex-grow-1 d-flex flex-column">
-                <PagedList
-                  :items="preview"
-                  :pageSize="selectedPageSize"
-                  v-model:page="selectedPage"
-                >
-                  <template #default="{ items, page, totalPages, goPrev, goNext }">
-                    <div class="overflow-auto flex-grow-1">
-                      <SelectedUsers
-                        class="w-100"
-                        :users="items"
-                        @remove="onRemoveSelected"
-                        @clear="onClearSelected"
-                      />
-                    </div>
-
-                    <div
-                      v-if="preview.length > selectedPageSize"
-                      class="p-2 border-top d-flex justify-content-between align-items-center"
-                    >
-                      <div class="small text-muted">선택 {{ preview.length }}명</div>
-                      <div>
-                        <button
-                          class="btn btn-sm btn-outline-secondary me-1"
-                          :disabled="page <= 1"
-                          @click="goPrev"
-                        >
-                          이전
-                        </button>
-                        <span class="mx-1">{{ page }} / {{ totalPages }}</span>
-                        <button
-                          class="btn btn-sm btn-outline-secondary ms-1"
-                          :disabled="page >= totalPages"
-                          @click="goNext"
-                        >
-                          다음
-                        </button>
-                      </div>
-                    </div>
-                  </template>
-                </PagedList>
-              </div>
+              <SelectedUsers
+                class="flex-grow-1"
+                :users="preview"
+                @remove="uncheck"
+                @clear="checkedIds = []"
+              />
             </div>
           </div>
         </div>
@@ -159,12 +98,11 @@
 
 <script>
 import SelectedUsers from './SelectedUsers.vue'
-import PagedList from './PagedList.vue'
 import { generateMockUsers } from '../utils/generateMockUsers.js'
 
 export default {
   name: 'UserPopup',
-  components: { SelectedUsers, PagedList },
+  components: { SelectedUsers },
   emits: ['close', 'confirm'],
   props: {
     preselectedIds: { type: Array, default: () => [] },
@@ -181,14 +119,9 @@ export default {
   },
   data() {
     return {
-      users: [],
+      users: [], // ← 여기서 자체 보관
       leftKeyword: '',
       checkedIds: [...this.preselectedIds],
-      // paging state (kept here so parent can control if needed)
-      leftPage: 1,
-      leftPageSize: 10,
-      selectedPage: 1,
-      selectedPageSize: 10,
       dragging: false,
       dragStart: { x: 0, y: 0 },
       dialogStart: { left: 0, top: 0 },
@@ -212,26 +145,10 @@ export default {
       const map = new Map(this.users.map((u) => [u.userId, u]))
       return this.checkedIds.map((id) => map.get(id)).filter(Boolean)
     },
-    // left paging (helper used when operating on current page)
-    leftTotalPages() {
-      return Math.max(1, Math.ceil(this.filteredLeft.length / this.leftPageSize))
-    },
-    paginatedLeft() {
-      const start = (this.leftPage - 1) * this.leftPageSize
-      return this.filteredLeft.slice(start, start + this.leftPageSize)
-    },
-    // right paging helpers
-    selectedTotalPages() {
-      return Math.max(1, Math.ceil(this.preview.length / this.selectedPageSize))
-    },
-    pagedPreview() {
-      const start = (this.selectedPage - 1) * this.selectedPageSize
-      return this.preview.slice(start, start + this.selectedPageSize)
-    },
     allChecked() {
-      if (!this.paginatedLeft.length) return false
+      if (!this.filteredLeft.length) return false
       const set = new Set(this.checkedIds)
-      return this.paginatedLeft.every((u) => set.has(u.userId))
+      return this.filteredLeft.every((u) => set.has(u.userId))
     },
     dialogInlineStyle() {
       const max = typeof this.maxWidth === 'number' ? `${this.maxWidth}px` : this.maxWidth
@@ -258,14 +175,9 @@ export default {
   },
   watch: {
     checkedIds() {
-      this.$nextTick(() => {
-        this.updateMasterIndeterminate()
-        if (this.selectedPage > this.selectedTotalPages) this.selectedPage = this.selectedTotalPages
-      })
+      this.$nextTick(this.updateMasterIndeterminate)
     },
     filteredLeft() {
-      // reset left page when filter changes
-      this.leftPage = 1
       this.$nextTick(this.updateMasterIndeterminate)
     },
   },
@@ -317,8 +229,7 @@ export default {
     },
 
     toggleAllVisible() {
-      // operate on current left page
-      const ids = this.paginatedLeft.map((u) => u.userId)
+      const ids = this.filteredLeft.map((u) => u.userId)
       const allIncluded = ids.every((id) => this.checkedIds.includes(id))
       this.checkedIds = allIncluded
         ? this.checkedIds.filter((id) => !ids.includes(id))
@@ -327,37 +238,13 @@ export default {
     updateMasterIndeterminate() {
       const el = this.$refs.master
       if (!el) return
-      const ids = new Set(this.paginatedLeft.map((u) => u.userId))
+      const ids = new Set(this.filteredLeft.map((u) => u.userId))
       let selected = 0
       for (const id of this.checkedIds) if (ids.has(id)) selected++
       el.indeterminate = selected > 0 && selected < ids.size
     },
     uncheck(id) {
       this.checkedIds = this.checkedIds.filter((x) => x !== id)
-    },
-
-    // left paging controls
-    leftPrev() {
-      if (this.leftPage > 1) this.leftPage--
-    },
-    leftNext() {
-      if (this.leftPage < this.leftTotalPages) this.leftPage++
-    },
-
-    // right paging controls and handlers
-    selectedPrev() {
-      if (this.selectedPage > 1) this.selectedPage--
-    },
-    selectedNext() {
-      if (this.selectedPage < this.selectedTotalPages) this.selectedPage++
-    },
-    onRemoveSelected(id) {
-      this.uncheck(id)
-      if (this.selectedPage > this.selectedTotalPages) this.selectedPage = this.selectedTotalPages
-    },
-    onClearSelected() {
-      this.checkedIds = []
-      this.selectedPage = 1
     },
 
     /* Modal 중앙정렬 */
