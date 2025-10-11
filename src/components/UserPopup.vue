@@ -12,7 +12,7 @@
           <div class="row g-3">
             <!-- LEFT: 전체 사용자 목록 -->
             <div class="col-12 col-lg-6">
-              <div class="border rounded-3 h-100 d-flex flex-column">
+              <div class="border rounded-3">
                 <div class="p-2 border-bottom">
                   <input
                     v-model="leftKeyword"
@@ -22,58 +22,55 @@
                 </div>
 
                 <!-- 표는 직접 렌더, 아래에 Pager만 '붙임' -->
-                <div class="p-0 flex-grow-1 d-flex flex-column">
-                  <div class="table-responsive code-inherit h-100">
-                    <table class="table table-sm table-hover mb-0 align-middle">
-                      <thead class="table-light position-sticky top-0">
-                        <tr>
-                          <th style="width: 44px">
-                            <div class="form-check m-0 d-flex justify-content-center">
-                              <input
-                                class="form-check-input"
-                                ref="master"
-                                type="checkbox"
-                                :checked="allChecked"
-                                :disabled="!filteredLeft.length"
-                                @change="toggleAllVisible"
-                                aria-label="현재 보이는 사용자 전체 선택/해제"
-                              />
-                            </div>
-                          </th>
-                          <th class="text-nowrap">UserId</th>
-                          <th>사용자명</th>
-                          <th>부서명</th>
-                          <th>직무</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- ✅ 여기서 items 대신 paginatedLeft 사용 -->
-                        <tr v-for="u in paginatedLeft" :key="u.userId">
-                          <td>
-                            <div class="form-check m-0 d-flex justify-content-center">
-                              <input
-                                class="form-check-input"
-                                type="checkbox"
-                                v-model="checkedIds"
-                                :value="u.userId"
-                              />
-                            </div>
-                          </td>
-                          <td>
-                            <span class="font-monospace text-body">{{ u.userId }}</span>
-                          </td>
-                          <td>{{ u.name }}</td>
-                          <td>{{ u.dept }}</td>
-                          <td>{{ u.role }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                <div class="table-responsive">
+                  <table class="table table-sm table-hover mb-0 align-middle">
+                    <thead class="table-light position-sticky top-0">
+                      <tr>
+                        <th style="width: 44px">
+                          <div class="form-check m-0 d-flex justify-content-center">
+                            <input
+                              class="form-check-input"
+                              ref="master"
+                              type="checkbox"
+                              :checked="allChecked"
+                              :disabled="!filteredLeft.length"
+                              @change="toggleAllVisible"
+                              aria-label="현재 보이는 사용자 전체 선택/해제"
+                            />
+                          </div>
+                        </th>
+                        <th class="text-nowrap">UserId</th>
+                        <th>사용자명</th>
+                        <th>부서명</th>
+                        <th>직무</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- ✅ 여기서 items 대신 paginatedLeft 사용 -->
+                      <tr v-for="u in paginatedLeft" :key="u.userId">
+                        <td>
+                          <div class="form-check m-0 d-flex justify-content-center">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              v-model="checkedIds"
+                              :value="u.userId"
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <span class="font-monospace text-body">{{ u.userId }}</span>
+                        </td>
+                        <td>{{ u.name }}</td>
+                        <td>{{ u.dept }}</td>
+                        <td>{{ u.role }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              <!-- 🔻 아래에 Pager만 단독으로 붙임 -->
+
               <PagedList
-                class="mt-auto"
                 :page="leftPage"
                 :totalPages="leftTotalPages"
                 :leftText="`총 ${filteredLeft.length}건`"
@@ -402,12 +399,5 @@ export default {
 }
 .modal-header {
   cursor: move;
-}
-
-/* 이 테이블 내부에서는 <code>색 대신 본문색으로 */
-.code-inherit code {
-  color: var(--bs-body-color) !important;
-  background: transparent;
-  padding: 0;
 }
 </style>
