@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserPage from '../pages/UserPage.vue'
+import UserSearGridPage from '../pages/UserSearGridPage.vue'
 
 const routes = [
   { path: '/', name: 'Users', component: UserPage },
+  { path: '/search-grid', name: '사용자(검색 그리드)', component: UserSearGridPage },
 ]
 
 const router = createRouter({
