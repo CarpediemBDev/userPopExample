@@ -69,18 +69,17 @@
                       </tbody>
                     </table>
                   </div>
-
-                  <!-- 🔻 아래에 Pager만 단독으로 붙임 -->
-                  <PagedList
-                    class="mt-auto"
-                    :page="leftPage"
-                    :totalPages="leftTotalPages"
-                    :leftText="`총 ${filteredLeft.length}건`"
-                    @prev="leftPrev"
-                    @next="leftNext"
-                  />
                 </div>
               </div>
+              <!-- 🔻 아래에 Pager만 단독으로 붙임 -->
+              <PagedList
+                class="mt-auto"
+                :page="leftPage"
+                :totalPages="leftTotalPages"
+                :leftText="`총 ${filteredLeft.length}건`"
+                @prev="leftPrev"
+                @next="leftNext"
+              />
             </div>
 
             <!-- RIGHT: 선택 미리보기 -->
