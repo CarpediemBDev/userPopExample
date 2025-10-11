@@ -99,7 +99,7 @@
                 <PagedList
                   v-if="preview.length > rightPageSize"
                   class="mt-auto"
-                  :page="selectedPage"
+                  :page="rightPage"
                   :totalPages="selectedTotalPages"
                   :leftText="`선택 ${preview.length}명`"
                   @prev="selectedPrev"
@@ -155,7 +155,7 @@ export default {
       // paging state (kept here so parent can control if needed)
       leftPage: 1,
       leftPageSize: 10,
-      selectedPage: 1,
+      rightPage: 1,
       rightPageSize: 10,
       dragging: false,
       dragStart: { x: 0, y: 0 },
@@ -193,7 +193,7 @@ export default {
       return Math.max(1, Math.ceil(this.preview.length / this.rightPageSize))
     },
     pagedPreview() {
-      const start = (this.selectedPage - 1) * this.rightPageSize
+      const start = (this.rightPage - 1) * this.rightPageSize
       return this.preview.slice(start, start + this.rightPageSize)
     },
     allChecked() {
@@ -228,7 +228,7 @@ export default {
     checkedIds() {
       this.$nextTick(() => {
         this.updateMasterIndeterminate()
-        if (this.selectedPage > this.selectedTotalPages) this.selectedPage = this.selectedTotalPages
+        if (this.rightPage > this.selectedTotalPages) this.rightPage = this.selectedTotalPages
       })
     },
     filteredLeft() {
@@ -314,18 +314,18 @@ export default {
 
     // right paging controls and handlers
     selectedPrev() {
-      if (this.selectedPage > 1) this.selectedPage--
+      if (this.rightPage > 1) this.rightPage--
     },
     selectedNext() {
-      if (this.selectedPage < this.selectedTotalPages) this.selectedPage++
+      if (this.rightPage < this.selectedTotalPages) this.rightPage++
     },
     onRemoveSelected(id) {
       this.uncheck(id)
-      if (this.selectedPage > this.selectedTotalPages) this.selectedPage = this.selectedTotalPages
+      if (this.rightPage > this.selectedTotalPages) this.rightPage = this.selectedTotalPages
     },
     onClearSelected() {
       this.checkedIds = []
-      this.selectedPage = 1
+      this.rightPage = 1
     },
 
     /* Modal 중앙정렬 */
