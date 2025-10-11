@@ -6,7 +6,7 @@
         <div class="input-group">
           <input
             v-model="form.userNames"
-            class="form-control"
+            class="form-control one-line"
             placeholder="이름 또는 ID 입력 후 Enter"
             @keydown.enter.prevent.stop="emitOpen"
           />
@@ -69,3 +69,11 @@ export default {
   },
 }
 </script>
+<style scoped>
+/* 한 줄 고정 + 넘치면 말줄임 처리 */
+.one-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
