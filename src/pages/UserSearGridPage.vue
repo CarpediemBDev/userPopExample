@@ -3,7 +3,12 @@
     <!-- SearchGrid: 사용자 선택용 툴바 (목록 위에 위치) -->
     <div class="row mb-3">
       <div class="col-12">
-        <SearchGrid ref="searchGrid" @open-user-popup="openPopup" @update:selected="onConfirm" />
+        <SearchGrid
+          ref="searchGrid"
+          @open-user-popup="openPopup"
+          @update:selected="onConfirm"
+          @search="loadUsers"
+        />
       </div>
     </div>
 

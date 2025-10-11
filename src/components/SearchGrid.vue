@@ -19,7 +19,7 @@
       <div
         class="col-12 col-md-auto ms-md-auto d-flex justify-content-end align-items-center pe-md-3"
       >
-        <button type="submit" class="btn btn-primary">조회</button>
+        <button type="button" class="btn btn-primary" @click="onSearch">조회</button>
         <button type="button" class="btn btn-secondary ms-2" @click="onReset">초기화</button>
       </div>
     </div>
@@ -57,10 +57,13 @@ export default {
         .join(', ')
       this.form.userIds = users.map((u) => u?.userId).filter(Boolean)
     },
-
+    // 초기화
     onReset() {
       this.form = { userNames: '', userIds: [] }
-      // 필요하면 즉시 조회 이벤트도 날리기
+    },
+
+    // 조회
+    onSearch() {
       this.$emit('search', { ...this.form })
     },
   },
