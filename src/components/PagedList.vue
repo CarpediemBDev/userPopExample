@@ -1,60 +1,39 @@
 <template>
-  <!-- renderless: render slot content directly, provide paging helpers -->
-  <slot
-    :items="pageItems"
-    :page="pageInternal"
-    :totalPages="totalPages"
-    :goPrev="goPrev"
-    :goNext="goNext"
-  ></slot>
+  <div class="p-2 border-top d-flex justify-content-between align-items-center">
+    <div class="small text-muted">
+      <slot name="left">{{ leftText }}</slot>
+    </div>
+    <div>
+      <button
+        class="btn btn-sm btn-outline-secondary me-1"
+        :disabled="page <= 1"
+        @click="$emit('prev')"
+      >
+        이전
+      </button>
+      <span class="mx-1">{{ page }} / {{ totalPages }}</span>
+      <button
+        class="btn btn-sm btn-outline-secondary ms-1"
+        :disabled="page >= totalPages"
+        @click="$emit('next')"
+      >
+        다음
+      </button>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'PagedList',
+  name: 'Pager',
   props: {
-    items: { type: Array, default: () => [] },
-    pageSize: { type: Number, default: 10 },
-    page: { type: Number, default: 1 },
-  },
-  emits: ['update:page'],
-  data() {
-    return {
-      pageInternal: this.page || 1,
-    }
-  },
-  computed: {
-    totalPages() {
-      return Math.max(1, Math.ceil((this.items || []).length / this.pageSize))
-    },
-    pageItems() {
-      const start = (this.pageInternal - 1) * this.pageSize
-      return (this.items || []).slice(start, start + this.pageSize)
-    },
-  },
-  watch: {
-    page(val) {
-      this.pageInternal = val || 1
-    },
-    items() {
-      // ensure pageInternal in range
-      if (this.pageInternal > this.totalPages) {
-        this.setPage(this.totalPages)
-      }
-    },
-  },
-  methods: {
-    setPage(p) {
-      const next = Math.min(Math.max(1, p || 1), this.totalPages)
-      this.pageInternal = next
-      this.$emit('update:page', next)
-    },
-    goPrev() {
-      if (this.pageInternal > 1) this.setPage(this.pageInternal - 1)
-    },
-    goNext() {
-      if (this.pageInternal < this.totalPages) this.setPage(this.pageInternal + 1)
-    },
+    page: { type: Number, required: true },
+    totalPages: { type: Number, required: true },
+    leftText: { type: String, default: '' },
   },
 }
 </script>
+
+<style scoped>
+/* small adjustments if needed */
+</style>

@@ -1,3 +1,4 @@
+<!-- UserPopup.vue (template만 교체) -->
 <template>
   <div class="modal fade show" style="display: block" tabindex="-1" role="dialog" aria-modal="true">
     <div class="modal-dialog" ref="dlg" :style="dialogInlineStyle">
@@ -19,133 +20,101 @@
                     placeholder="검색(ID/이름/부서/직무)"
                   />
                 </div>
-                <PagedList :items="filteredLeft" :pageSize="leftPageSize" v-model:page="leftPage">
-                  <template #default="{ items, page, totalPages, goPrev, goNext }">
-                    <div class="p-0 flex-grow-1">
-                      <div class="table-responsive code-inherit h-100">
-                        <table class="table table-sm table-hover mb-0 align-middle">
-                          <thead class="table-light position-sticky top-0">
-                            <tr>
-                              <th style="width: 44px">
-                                <div class="form-check m-0 d-flex justify-content-center">
-                                  <input
-                                    class="form-check-input"
-                                    ref="master"
-                                    type="checkbox"
-                                    :checked="allChecked"
-                                    :disabled="!filteredLeft.length"
-                                    @change="toggleAllVisible"
-                                    aria-label="현재 보이는 사용자 전체 선택/해제"
-                                  />
-                                </div>
-                              </th>
-                              <th class="text-nowrap">UserId</th>
-                              <th>사용자명</th>
-                              <th>부서명</th>
-                              <th>직무</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="u in items" :key="u.userId">
-                              <td>
-                                <div class="form-check m-0 d-flex justify-content-center">
-                                  <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    v-model="checkedIds"
-                                    :value="u.userId"
-                                  />
-                                </div>
-                              </td>
-                              <td>
-                                <span class="font-monospace text-body">{{ u.userId }}</span>
-                              </td>
-                              <td>{{ u.name }}</td>
-                              <td>{{ u.dept }}</td>
-                              <td>{{ u.role }}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
 
-                      <div class="p-2 border-top d-flex justify-content-between align-items-center">
-                        <div class="small text-muted">총 {{ filteredLeft.length }}건</div>
-                        <div>
-                          <button
-                            class="btn btn-sm btn-outline-secondary me-1"
-                            :disabled="page <= 1"
-                            @click="goPrev"
-                          >
-                            이전
-                          </button>
-                          <span class="mx-1">{{ page }} / {{ totalPages }}</span>
-                          <button
-                            class="btn btn-sm btn-outline-secondary ms-1"
-                            :disabled="page >= totalPages"
-                            @click="goNext"
-                          >
-                            다음
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </PagedList>
+                <!-- 표는 직접 렌더, 아래에 Pager만 '붙임' -->
+                <div class="p-0 flex-grow-1 d-flex flex-column">
+                  <div class="table-responsive code-inherit h-100">
+                    <table class="table table-sm table-hover mb-0 align-middle">
+                      <thead class="table-light position-sticky top-0">
+                        <tr>
+                          <th style="width: 44px">
+                            <div class="form-check m-0 d-flex justify-content-center">
+                              <input
+                                class="form-check-input"
+                                ref="master"
+                                type="checkbox"
+                                :checked="allChecked"
+                                :disabled="!filteredLeft.length"
+                                @change="toggleAllVisible"
+                                aria-label="현재 보이는 사용자 전체 선택/해제"
+                              />
+                            </div>
+                          </th>
+                          <th class="text-nowrap">UserId</th>
+                          <th>사용자명</th>
+                          <th>부서명</th>
+                          <th>직무</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- ✅ 여기서 items 대신 paginatedLeft 사용 -->
+                        <tr v-for="u in paginatedLeft" :key="u.userId">
+                          <td>
+                            <div class="form-check m-0 d-flex justify-content-center">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                v-model="checkedIds"
+                                :value="u.userId"
+                              />
+                            </div>
+                          </td>
+                          <td>
+                            <span class="font-monospace text-body">{{ u.userId }}</span>
+                          </td>
+                          <td>{{ u.name }}</td>
+                          <td>{{ u.dept }}</td>
+                          <td>{{ u.role }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- 🔻 아래에 Pager만 단독으로 붙임 -->
+                  <PagedList
+                    class="mt-auto"
+                    :page="leftPage"
+                    :totalPages="leftTotalPages"
+                    :leftText="`총 ${filteredLeft.length}건`"
+                    @prev="leftPrev"
+                    @next="leftNext"
+                  />
+                </div>
               </div>
             </div>
 
-            <!-- RIGHT: 선택 미리보기 (공통 컴포넌트) -->
+            <!-- RIGHT: 선택 미리보기 -->
             <div class="col-12 col-lg-6 d-flex flex-column">
               <div class="p-0 flex-grow-1 d-flex flex-column">
-                <PagedList
-                  :items="preview"
-                  :pageSize="selectedPageSize"
-                  v-model:page="selectedPage"
-                >
-                  <template #default="{ items, page, totalPages, goPrev, goNext }">
-                    <div class="overflow-auto flex-grow-1">
-                      <SelectedUsers
-                        class="w-100"
-                        :users="items"
-                        @remove="onRemoveSelected"
-                        @clear="onClearSelected"
-                      />
-                    </div>
+                <div class="overflow-auto flex-grow-1">
+                  <!-- ✅ 여기서도 items 대신 pagedPreview 사용 -->
+                  <SelectedUsers
+                    class="w-100"
+                    :users="pagedPreview"
+                    @remove="onRemoveSelected"
+                    @clear="onClearSelected"
+                  />
+                </div>
 
-                    <div
-                      v-if="preview.length > selectedPageSize"
-                      class="p-2 border-top d-flex justify-content-between align-items-center"
-                    >
-                      <div class="small text-muted">선택 {{ preview.length }}명</div>
-                      <div>
-                        <button
-                          class="btn btn-sm btn-outline-secondary me-1"
-                          :disabled="page <= 1"
-                          @click="goPrev"
-                        >
-                          이전
-                        </button>
-                        <span class="mx-1">{{ page }} / {{ totalPages }}</span>
-                        <button
-                          class="btn btn-sm btn-outline-secondary ms-1"
-                          :disabled="page >= totalPages"
-                          @click="goNext"
-                        >
-                          다음
-                        </button>
-                      </div>
-                    </div>
-                  </template>
-                </PagedList>
+                <!-- 🔻 선택영역에도 Pager '붙임' (필요할 때만 표시) -->
+                <PagedList
+                  v-if="preview.length > rightPageSize"
+                  class="mt-auto"
+                  :page="selectedPage"
+                  :totalPages="selectedTotalPages"
+                  :leftText="`선택 ${preview.length}명`"
+                  @prev="selectedPrev"
+                  @next="selectedNext"
+                />
               </div>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <small class="me-auto text-muted"
-            >체크박스로 여러 명 선택 후 <strong>확인</strong>을 누르세요.</small
-          >
+          <small class="me-auto text-muted">
+            체크박스로 여러 명 선택 후 <strong>확인</strong>을 누르세요.
+          </small>
           <button class="btn btn-outline-secondary" @click="onClose">취소</button>
           <button class="btn btn-success" :disabled="!checkedIds.length" @click="emitConfirm">
             확인 ({{ checkedIds.length }})
@@ -188,7 +157,7 @@ export default {
       leftPage: 1,
       leftPageSize: 10,
       selectedPage: 1,
-      selectedPageSize: 10,
+      rightPageSize: 10,
       dragging: false,
       dragStart: { x: 0, y: 0 },
       dialogStart: { left: 0, top: 0 },
@@ -222,11 +191,11 @@ export default {
     },
     // right paging helpers
     selectedTotalPages() {
-      return Math.max(1, Math.ceil(this.preview.length / this.selectedPageSize))
+      return Math.max(1, Math.ceil(this.preview.length / this.rightPageSize))
     },
     pagedPreview() {
-      const start = (this.selectedPage - 1) * this.selectedPageSize
-      return this.preview.slice(start, start + this.selectedPageSize)
+      const start = (this.selectedPage - 1) * this.rightPageSize
+      return this.preview.slice(start, start + this.rightPageSize)
     },
     allChecked() {
       if (!this.paginatedLeft.length) return false
