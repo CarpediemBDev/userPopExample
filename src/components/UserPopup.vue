@@ -1,4 +1,4 @@
-<!-- UserPopup.vue (template만 교체) -->
+<!-- UserPopup.vue -->
 <template>
   <div class="modal fade show" style="display: block" tabindex="-1" role="dialog" aria-modal="true">
     <div class="modal-dialog" ref="dlg" :style="dialogInlineStyle">
@@ -80,29 +80,23 @@
             </div>
 
             <!-- RIGHT: 선택 미리보기 -->
-            <div class="col-12 col-lg-6 d-flex flex-column">
-              <div class="p-0 flex-grow-1 d-flex flex-column">
-                <div class="overflow-auto flex-grow-1">
-                  <!-- ✅ 여기서도 items 대신 pagedPreview 사용 -->
-                  <SelectedUsers
-                    class="w-100"
-                    :users="pagedPreview"
-                    @remove="onRemoveSelected"
-                    @clear="onClearSelected"
-                  />
-                </div>
+            <div class="col-12 col-lg-6">
+              <!-- ✅ 여기서도 items 대신 pagedPreview 사용 -->
+              <SelectedUsers
+                :users="pagedPreview"
+                @remove="onRemoveSelected"
+                @clear="onClearSelected"
+              />
 
-                <!-- 🔻 선택영역에도 Pager '붙임' (필요할 때만 표시) -->
-                <PagedList
-                  v-if="preview.length > rightPageSize"
-                  class="mt-auto"
-                  :page="rightPage"
-                  :totalPages="selectedTotalPages"
-                  :leftText="`선택 ${preview.length}명`"
-                  @prev="selectedPrev"
-                  @next="selectedNext"
-                />
-              </div>
+              <!-- 🔻 선택영역에도 Pager '붙임' (필요할 때만 표시) -->
+              <PagedList
+                v-if="preview.length > rightPageSize"
+                :page="rightPage"
+                :totalPages="selectedTotalPages"
+                :leftText="`선택 ${preview.length}명`"
+                @prev="selectedPrev"
+                @next="selectedNext"
+              />
             </div>
           </div>
         </div>
