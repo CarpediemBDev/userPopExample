@@ -1,3 +1,4 @@
+<!-- NavBar.vue -->
 <template>
   <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
@@ -19,35 +20,62 @@
         <!-- 데스크톱: 드롭다운 2단 -->
         <div class="navbar-collapse d-none d-lg-flex">
           <ul class="navbar-nav me-auto">
-            <!-- 1단: 그룹 -->
             <li v-for="(grp, i) in menu" :key="`m-${i}`" class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                 {{ grp.label }}
               </a>
-              <!-- 2단: 항목 -->
               <ul class="dropdown-menu">
                 <li v-for="(item, j) in grp.children" :key="`mi-${i}-${j}`">
                   <RouterLink v-if="item.to" class="dropdown-item" :to="item.to">
                     {{ item.label }}
                   </RouterLink>
-                  <a v-else href="#" class="dropdown-item" @click.prevent>
-                    {{ item.label }}
-                  </a>
+                  <span v-else class="dropdown-item text-muted">{{ item.label }}</span>
                 </li>
               </ul>
             </li>
           </ul>
-
           <span class="navbar-text small text-muted">Vue3 + Bootstrap 5</span>
         </div>
       </div>
     </nav>
 
-    <!-- 모바일: 오프캔버스(콜랩스 2단) -->
+    <!-- 모바일: 오프캔버스(상단 사용자 정보 + 콜랩스 2단 메뉴) -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="navDrawer">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title">메뉴</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      <!-- 사용자 정보 + 홈 + 로그아웃 -->
+      <div class="offcanvas-header border-bottom justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-person-circle fs-4"></i>
+          <div class="d-flex flex-column">
+            <strong class="lh-1">{{ user.name }}</strong>
+            <small class="text-muted">{{ user.email }}</small>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <RouterLink
+            to="/"
+            class="btn btn-sm btn-outline-secondary"
+            data-bs-dismiss="offcanvas"
+            aria-label="홈으로 이동"
+          >
+            <i class="bi bi-house"></i><span class="ms-1 d-none d-sm-inline">홈</span>
+          </RouterLink>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            @click="onSignOut"
+            data-bs-dismiss="offcanvas"
+            aria-label="로그아웃"
+          >
+            <i class="bi bi-box-arrow-right"></i
+            ><span class="ms-1 d-none d-sm-inline">로그아웃</span>
+          </button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="닫기"
+          ></button>
+        </div>
       </div>
 
       <div class="offcanvas-body p-0">
@@ -55,6 +83,7 @@
           <!-- 1단: 그룹 -->
           <template v-for="(grp, i) in menu" :key="`g-${i}`">
             <button
+              type="button"
               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
               data-bs-toggle="collapse"
               :data-bs-target="`#grp-${i}`"
@@ -79,7 +108,7 @@
                   >
                     {{ item.label }}
                   </RouterLink>
-                  <span v-else class="d-block">{{ item.label }}</span>
+                  <span v-else>{{ item.label }}</span>
                 </li>
               </ul>
             </div>
@@ -91,14 +120,15 @@
 </template>
 
 <script>
-import { RouterLink } from 'vue-router' // 환경에 따라 글로벌이지만, 안전하게 명시 등록
+import { RouterLink } from 'vue-router'
 
 export default {
   name: 'NavBar',
   components: { RouterLink },
   data() {
     return {
-      // 중간 "사용자 목록" 단계 제거 -> 바로 라우트 연결
+      user: { name: '홍길동', email: 'hong@example.com' },
+      // 중간 '사용자 목록' 단계 없이 바로 라우트 연결
       menu: [
         {
           label: '사용자 관리',
@@ -120,5 +150,20 @@ export default {
       ],
     }
   },
+  methods: {
+    onSignOut() {
+      // TODO: 실제 로그아웃 로직(토큰 삭제, 세션 종료, API 호출 등) 구현
+      // 예: localStorage.removeItem('token')
+      // 예: await api.post('/auth/logout')
+      // 이동
+      if (this.$router) this.$router.push('/login')
+    },
+  },
 }
 </script>
+
+<style scoped>
+.list-group-item {
+  min-height: 44px;
+}
+</style>
