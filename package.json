@@ -10,8 +10,9 @@
     "make:db": "node ./scripts/make-db.mjs --count=100 --seed=42"
   },
   "dependencies": {
-    "bootstrap": "^5.3.3",
     "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.13.1",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
   },

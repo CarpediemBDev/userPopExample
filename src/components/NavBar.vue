@@ -51,14 +51,16 @@
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
+          <!-- 아이콘만 (텍스트 제거) -->
           <RouterLink
             to="/"
             class="btn btn-sm btn-outline-secondary"
             data-bs-dismiss="offcanvas"
             aria-label="홈으로 이동"
           >
-            <i class="bi bi-house"></i><span class="ms-1 d-none d-sm-inline">홈</span>
+            <i class="bi bi-house"></i>
           </RouterLink>
+
           <button
             type="button"
             class="btn btn-sm btn-outline-danger"

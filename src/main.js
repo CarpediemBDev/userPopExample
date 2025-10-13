@@ -4,6 +4,7 @@ import router from './router'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 import { showToast } from './utils/toastUtil.js'
 
