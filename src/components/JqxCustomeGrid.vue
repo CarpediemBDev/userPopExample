@@ -6,7 +6,7 @@
       :height="height"
       :theme="theme"
       :source="adapter"
-      :columns="columns"
+      :columns="columnsOut"
       :editable="editable"
       :selectionmode="selectionmode"
       :pageable="pageable"
@@ -16,53 +16,28 @@
       :filterable="filterable"
       :columnsresize="columnsresize"
       :columnsreorder="columnsreorder"
-      :altrows="altrows"
-      :autoheight="autoheight"
+      :autoheight="true"
     />
   </div>
 </template>
 
 <script>
-/**
- * JqxCustomeGrid.vue — 간결한 JqxGrid 공통 컴포넌트 (C/U/D + rowStatus)
- * - 부모에서 columns, datafields 를 props로 주입
- * - v-model 로 rows 동기화
- * - addrow / updaterow / deleterow 콜백에서 rowStatus: 'A' | 'U' | 'D'
- * - JqxGrid가 보장하는 값들을 신뢰하고 불필요한 체크는 최소화
- */
 import JqxGrid from 'jqwidgets-scripts/jqwidgets-vue3/vue_jqxgrid.vue'
-
-// 필요한 jqx 모듈
-import 'jqwidgets-scripts/jqwidgets/jqxcore.js'
-import 'jqwidgets-scripts/jqwidgets/jqxdata.js'
-import 'jqwidgets-scripts/jqwidgets/jqxbuttons.js'
-import 'jqwidgets-scripts/jqwidgets/jqxscrollbar.js'
-import 'jqwidgets-scripts/jqwidgets/jqxmenu.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.edit.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.selection.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.columnsresize.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.columnsreorder.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.pager.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.sort.js'
-import 'jqwidgets-scripts/jqwidgets/jqxgrid.filter.js'
-
-// CSS 스타일
 import 'jqwidgets-scripts/jqwidgets/styles/jqx.base.css'
+import 'jqwidgets-scripts/jqwidgets/styles/jqx.bootstrap.css'
 
 export default {
   name: 'JqxCustomeGrid',
   components: { JqxGrid },
   props: {
-    modelValue: { type: Array, default: () => [] },
+    localdata: { type: Array, default: () => [] },
     datafields: { type: Array, required: true },
     columns: { type: Array, required: true },
-    keyField: { type: String, default: '' },
     width: { type: [Number, String], default: '100%' },
     height: { type: [Number, String], default: '100%' },
-    theme: { type: String, default: '' },
+    theme: { type: String, default: 'bootstrap' },
     editable: { type: Boolean, default: true },
-    selectionmode: { type: String, default: 'singlerow' },
+    selectionmode: { type: String, default: 'multiplerows' },
     pageable: { type: Boolean, default: true },
     pagesize: { type: Number, default: 20 },
     pagesizeoptions: { type: Array, default: () => [10, 20, 50, 100] },
@@ -70,61 +45,67 @@ export default {
     filterable: { type: Boolean, default: false },
     columnsresize: { type: Boolean, default: true },
     columnsreorder: { type: Boolean, default: true },
-    altrows: { type: Boolean, default: true },
-    autoheight: { type: Boolean, default: false },
+    autoheight: { type: Boolean, default: true },
+    showRowStatus: { type: Boolean, default: true },
   },
-  emits: ['update:modelValue', 'ready'],
+
   data() {
     return {
-      rows: [],
       adapter: null,
-      source: null,
-      seq: 0,
     }
   },
   computed: {
-    idField() {
-      return this.keyField && this.keyField.length ? this.keyField : '_rid'
-    },
+    // rowStatus 필드 자동 보강
     augmentedDatafields() {
-      // rowStatus 필드가 없으면 자동 추가
       return this.datafields.some((f) => f.name === 'rowStatus')
         ? this.datafields
         : [...this.datafields, { name: 'rowStatus', type: 'string' }]
     },
+    // 상태표시 컬럼 자동 추가 (뱃지 HTML 렌더)
+    columnsOut() {
+      if (!this.showRowStatus) return this.columns
+      const has = this.columns.some((c) => c.datafield === 'rowStatus')
+      if (has) return this.columns
+      const statusCol = {
+        text: '상태',
+        datafield: 'rowStatus',
+        width: 72,
+        editable: false,
+        cellsrenderer: (row, col, val) => {
+          const v = val || ''
+          const badge =
+            v === 'A'
+              ? '<span class="jqs-badge jqs-badge-a">A</span>'
+              : v === 'U'
+              ? '<span class="jqs-badge jqs-badge-u">U</span>'
+              : v === 'D'
+              ? '<span class="jqs-badge jqs-badge-d">D</span>'
+              : '<span class="jqs-badge jqs-badge-n">–</span>'
+          return `<div class="jqs-cell">${badge}</div>`
+        },
+        cellclassname: (row, datafield, value, rowData) => {
+          if (rowData.rowStatus === 'A') return 'jqs-row-a'
+          if (rowData.rowStatus === 'U') return 'jqs-row-u'
+          if (rowData.rowStatus === 'D') return 'jqs-row-d'
+          return ''
+        },
+      }
+      return [statusCol, ...this.columns]
+    },
   },
   watch: {
-    // 부모에서 v-model이 갱신되면 rows만 교체하고 바운드 데이터 갱신
-    modelValue: {
-      immediate: true,
-      deep: true,
-      handler(v) {
-        this.rows = (v || []).map((r) => ({ ...r }))
-        if (!this.adapter) {
-          this.bind()
-        } else {
-          this.source.localdata = this.rows
-          // 그리드가 이미 렌더된 경우에만 갱신
-          this.$nextTick(() => this.$refs.grid?.updatebounddata('cells'))
-        }
-      },
+    localdata() {
+      this.source.localdata = this.localdata
+      this.$refs.grid?.updatebounddata('cells')
     },
   },
-  mounted() {
-    this.$emit('ready', this.api())
+  created() {
+    this.bind()
   },
   methods: {
-    // --------- Public API ---------
-    api() {
-      return {
-        add: this.add,
-        deleteSelected: this.deleteSelected,
-        getCUD: this.getCUD,
-        clearStatuses: this.clearStatuses,
-        jqx: () => this.$refs.grid,
-      }
-    },
+    // 부모에서 this.$refs.gridComp.add(...) 식으로 호출
     add(initial = {}) {
+      console.log('add called', initial)
       this.$refs.grid.addrow(null, initial)
     },
     deleteSelected() {
@@ -134,11 +115,11 @@ export default {
         this.$refs.grid.deleterow(id)
       })
     },
-    getCUD() {
+    getChanges() {
       const added = [],
         updated = [],
         deleted = []
-      for (const r of this.rows) {
+      for (const r of this.localdata) {
         if (r.rowStatus === 'A') added.push(r)
         else if (r.rowStatus === 'U') updated.push(r)
         else if (r.rowStatus === 'D') deleted.push(r)
@@ -146,67 +127,138 @@ export default {
       return { added, updated, deleted }
     },
     clearStatuses() {
-      this.rows.forEach((r) => {
+      this.localdata.forEach((r) => {
         if (r.rowStatus) delete r.rowStatus
       })
-      this.sync()
     },
 
-    // --------- jqx source / adapter ---------
+    // jqx source / adapter
     bind() {
-      const that = this
       this.source = {
         datatype: 'array',
-        localdata: this.rows,
+        localdata: this.localdata,
         datafields: this.augmentedDatafields,
-        id: this.idField,
 
-        // 추가: rowdata 그대로 사용 + 최소 세팅
-        addrow(rowid, rowdata, position, commit) {
-          const id = rowdata[that.idField] || `__rid_${Date.now()}_${++that.seq}`
-          rowdata[that.idField] = id
+        // 짧고 담백한 CUD 콜백 (화살표 함수로 this 컨텍스트 유지)
+        addrow: (rowid, rowdata, position, commit) => {
           rowdata.rowStatus = 'A'
-          const i = that.indexById(id)
-          i > -1 ? that.rows.splice(i, 1, rowdata) : that.rows.push(rowdata)
+          // 배열의 맨 위에 추가
+          this.localdata.unshift(rowdata)
+          // source.localdata도 동기화
+          this.source.localdata = this.localdata
           commit(true)
-          that.sync()
+          // 그리드 새로고침
+          this.$nextTick(() => {
+            this.$refs.grid?.updatebounddata('cells')
+          })
         },
+        updaterow: (rowid, newdata, commit) => {
+          console.log('updaterow callback - rowid:', rowid, 'newdata:', newdata)
+          const i = rowid // rowid가 인덱스
+          if (i < 0 || i >= this.localdata.length) return commit(false)
 
-        // 수정: newdata 에 변경사항이 전부 담김 → 가볍게 머지
-        updaterow(rowid, newdata, commit) {
-          const id = typeof rowid === 'object' ? rowid[that.idField] : rowid
-          const i = that.indexById(id)
-          if (i === -1) return commit(false)
-          const prev = that.rows[i]
-          const next = { ...prev, ...newdata }
-          next.rowStatus = prev.rowStatus === 'A' ? 'A' : 'U'
-          that.rows.splice(i, 1, next)
+          // 기존 rowStatus 확인 (새로 추가된 행이면 'A' 유지, 아니면 'U')
+          const prevStatus = this.localdata[i].rowStatus
+          this.localdata.splice(i, 1, {
+            ...newdata,
+            rowStatus: prevStatus === 'A' ? 'A' : 'U',
+          })
+          // source.localdata도 동기화
+          this.source.localdata = this.localdata
           commit(true)
-          that.sync()
+          this.$nextTick(() => {
+            this.$refs.grid?.updatebounddata('cells')
+          })
         },
-
-        // 삭제: 물리삭제 대신 표시만 'D'
-        deleterow(rowid, commit) {
-          const id = typeof rowid === 'object' ? rowid[that.idField] : rowid
-          const i = that.indexById(id)
-          if (i === -1) return commit(false)
-          that.rows[i].rowStatus = 'D'
+        deleterow: (rowid, rowdata, commit) => {
+          console.log('deleterow callback - rowid:', rowid, 'rowdata:', rowdata)
+          const i = rowid // rowid가 인덱스
+          if (i < 0 || i >= this.localdata.length) return commit(false)
+          // rowdata가 있다면 직접 사용, 없다면 기존 방식
+          if (rowdata) {
+            this.localdata.splice(i, 1, { ...rowdata, rowStatus: 'D' })
+          } else {
+            this.localdata[i] = { ...this.localdata[i], rowStatus: 'D' }
+          }
+          // source.localdata도 동기화
+          this.source.localdata = this.localdata
           commit(true)
-          that.sync()
+          this.$nextTick(() => {
+            this.$refs.grid?.updatebounddata('cells')
+          })
         },
       }
       this.adapter = new jqx.dataAdapter(this.source)
     },
-
-    sync() {
-      this.$emit(
-        'update:modelValue',
-        this.rows.map((r) => ({ ...r }))
-      )
-    },
-    indexById(id) {
-      return this.rows.findIndex((r) => r[this.idField] === id)
-    },
   },
 }
 </script>
+
+<style scoped>
+/* 헤더 톤다운 */
+.jqx-custome-grid :deep(.jqx-grid-column-header) {
+  background: linear-gradient(180deg, #f8f9fa, #f1f3f5);
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+}
+/* hover 완화 */
+.jqx-custome-grid :deep(.jqx-grid-cell-hover) {
+  background-color: #f6f8fa !important;
+}
+/* 선택색 부드럽게 */
+.jqx-custome-grid :deep(.jqx-grid-cell-selected) {
+  background-color: #e7f1ff !important;
+  color: #0b5ed7 !important;
+}
+/* 대안행 */
+.jqx-custome-grid :deep(.jqx-grid-cell-alt) {
+  background-color: #fafbfc;
+}
+
+/* 상태 뱃지/행 하이라이트 */
+.jqs-cell {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 6px;
+}
+.jqs-badge {
+  display: inline-block;
+  min-width: 22px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 10px;
+  padding: 0 6px;
+}
+.jqs-badge-a {
+  background: #d1fae5;
+  color: #0f5132;
+  border: 1px solid #a7f3d0;
+}
+.jqs-badge-u {
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffe69c;
+}
+.jqs-badge-d {
+  background: #fde2e1;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+}
+.jqs-badge-n {
+  background: #e9ecef;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+.jqx-custome-grid :deep(.jqs-row-a) {
+  background-color: #f2fbf7;
+}
+.jqx-custome-grid :deep(.jqs-row-u) {
+  background-color: #fffaf0;
+}
+.jqx-custome-grid :deep(.jqs-row-d) {
+  background-color: #fff5f5;
+  text-decoration: line-through;
+}
+</style>
