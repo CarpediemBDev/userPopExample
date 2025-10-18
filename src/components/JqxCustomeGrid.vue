@@ -37,7 +37,7 @@ export default {
     height: { type: [Number, String], default: '100%' },
     theme: { type: String, default: 'bootstrap' },
     editable: { type: Boolean, default: true },
-    selectionmode: { type: String, default: 'multiplerows' },
+    selectionmode: { type: String, default: 'singlerows' },
     pageable: { type: Boolean, default: true },
     pagesize: { type: Number, default: 20 },
     pagesizeoptions: { type: Array, default: () => [10, 20, 50, 100] },
@@ -208,55 +208,14 @@ export default {
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
 }
-/* hover 완화 */
+/* hover */
 .jqx-custome-grid :deep(.jqx-grid-cell-hover) {
-  background-color: #f6f8fa !important;
+  background-color: #eef5ff !important;
 }
-/* 선택색 부드럽게 */
+/* 선택색 */
 .jqx-custome-grid :deep(.jqx-grid-cell-selected) {
-  background-color: #e7f1ff !important;
-  color: #0b5ed7 !important;
-}
-/* 대안행 */
-.jqx-custome-grid :deep(.jqx-grid-cell-alt) {
-  background-color: #fafbfc;
-}
-
-/* 상태 컬럼 - 유니코드 아이콘 */
-.jqs-state-cell {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  height: 100%;
-  width: 100%;
-  font-size: 14px;
-  font-weight: bold;
-  font-family: 'Segoe UI Symbol', 'Arial Unicode MS', sans-serif;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-  text-align: center !important;
-  line-height: 1;
-}
-
-/* 상태별 직접 색상 클래스 - 최고 우선순위 */
-.jqx-custome-grid :deep(.jqs-state-cell.status-add) {
-  color: #22c55e !important;
-  filter: none !important;
-}
-
-.jqx-custome-grid :deep(.jqs-state-cell.status-update) {
-  color: #22c55e !important;
-  filter: none !important;
-}
-
-.jqx-custome-grid :deep(.jqs-state-cell.status-delete) {
-  color: #ef4444 !important;
-  filter: none !important;
-}
-
-.jqs-state-cell:hover {
-  transform: scale(1.1);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background-color: #cfe2ff !important;
+  color: #052c65 !important;
 }
 
 /* 강제 중앙 정렬 - 첫 번째 컬럼 (상태 컬럼) */
@@ -267,12 +226,7 @@ export default {
   justify-content: center !important;
 }
 
-/* 첫 번째 헤더도 중앙 정렬 */
-.jqx-custome-grid :deep(.jqx-grid-column-header:first-child) {
-  text-align: center !important;
-}
-
-/* 행 상태별 스타일링 */
+/* 행 상태별 백그라운드 스타일링 */
 .jqx-custome-grid :deep(.jqs-row-a) {
   background-color: #f2fbf7;
 }
