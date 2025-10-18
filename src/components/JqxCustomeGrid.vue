@@ -61,27 +61,34 @@ export default {
         ? this.datafields
         : [...this.datafields, { name: 'rowStatus', type: 'string' }]
     },
-    // 상태표시 컬럼 자동 추가 (뱃지 HTML 렌더)
     columnsOut() {
       if (!this.showRowStatus) return this.columns
       const has = this.columns.some((c) => c.datafield === 'rowStatus')
       if (has) return this.columns
       const statusCol = {
-        text: '상태',
+        text: '',
         datafield: 'rowStatus',
-        width: 72,
+        width: 10,
         editable: false,
+        align: 'center',
+        cellsalign: 'center',
         cellsrenderer: (row, col, val) => {
           const v = val || ''
-          const badge =
-            v === 'A'
-              ? '<span class="jqs-badge jqs-badge-a">A</span>'
-              : v === 'U'
-              ? '<span class="jqs-badge jqs-badge-u">U</span>'
-              : v === 'D'
-              ? '<span class="jqs-badge jqs-badge-d">D</span>'
-              : '<span class="jqs-badge jqs-badge-n">–</span>'
-          return `<div class="jqs-cell">${badge}</div>`
+          let icon = ''
+          let colorClass = ''
+
+          if (v === 'A') {
+            icon = '➕'
+            colorClass = 'status-add'
+          } else if (v === 'U') {
+            icon = '✓'
+            colorClass = 'status-update'
+          } else if (v === 'D') {
+            icon = '➖'
+            colorClass = 'status-delete'
+          }
+
+          return `<div class="jqs-state-cell ${colorClass}">${icon}</div>`
         },
         cellclassname: (row, datafield, value, rowData) => {
           if (rowData.rowStatus === 'A') return 'jqs-row-a'
@@ -215,42 +222,57 @@ export default {
   background-color: #fafbfc;
 }
 
-/* 상태 뱃지/행 하이라이트 */
-.jqs-cell {
-  display: flex;
-  align-items: center;
+/* 상태 컬럼 - 유니코드 아이콘 */
+.jqs-state-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   height: 100%;
-  padding-left: 6px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Segoe UI Symbol', 'Arial Unicode MS', sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  text-align: center !important;
+  line-height: 1;
 }
-.jqs-badge {
-  display: inline-block;
-  min-width: 22px;
-  text-align: center;
-  font-size: 12px;
-  line-height: 18px;
-  border-radius: 10px;
-  padding: 0 6px;
+
+/* 상태별 직접 색상 클래스 - 최고 우선순위 */
+.jqx-custome-grid :deep(.jqs-state-cell.status-add) {
+  color: #22c55e !important;
+  filter: none !important;
 }
-.jqs-badge-a {
-  background: #d1fae5;
-  color: #0f5132;
-  border: 1px solid #a7f3d0;
+
+.jqx-custome-grid :deep(.jqs-state-cell.status-update) {
+  color: #22c55e !important;
+  filter: none !important;
 }
-.jqs-badge-u {
-  background: #fff3cd;
-  color: #664d03;
-  border: 1px solid #ffe69c;
+
+.jqx-custome-grid :deep(.jqs-state-cell.status-delete) {
+  color: #ef4444 !important;
+  filter: none !important;
 }
-.jqs-badge-d {
-  background: #fde2e1;
-  color: #842029;
-  border: 1px solid #f5c2c7;
+
+.jqs-state-cell:hover {
+  transform: scale(1.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
-.jqs-badge-n {
-  background: #e9ecef;
-  color: #495057;
-  border: 1px solid #dee2e6;
+
+/* 강제 중앙 정렬 - 첫 번째 컬럼 (상태 컬럼) */
+.jqx-custome-grid :deep(.jqx-grid-cell:first-child) {
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
+
+/* 첫 번째 헤더도 중앙 정렬 */
+.jqx-custome-grid :deep(.jqx-grid-column-header:first-child) {
+  text-align: center !important;
+}
+
+/* 행 상태별 스타일링 */
 .jqx-custome-grid :deep(.jqs-row-a) {
   background-color: #f2fbf7;
 }
