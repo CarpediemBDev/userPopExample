@@ -37,7 +37,7 @@ export default {
     height: { type: [Number, String], default: '100%' },
     theme: { type: String, default: 'bootstrap' },
     editable: { type: Boolean, default: true },
-    selectionmode: { type: String, default: 'singlerows' },
+    selectionmode: { type: String, default: 'checkbox' },
     pageable: { type: Boolean, default: true },
     pagesize: { type: Number, default: 20 },
     pagesizeoptions: { type: Array, default: () => [10, 20, 50, 100] },

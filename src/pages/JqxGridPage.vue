@@ -12,7 +12,7 @@
       :localdata="rows"
       :datafields="datafields"
       :columns="columns"
-      selectionmode="multiplerows"
+      selectionmode="checkbox"
       :height="560"
       theme="bootstrap"
     />
@@ -49,15 +49,12 @@ export default {
   },
   methods: {
     async loadUsers() {
-      // Vite 환경에서도 동작하도록 BASE_URL 고려
       const url = (import.meta.env?.BASE_URL ?? '/') + 'db.json'
       const res = await fetch(url)
       const data = await res.json()
       this.rows = Array.isArray(data) ? data : data.users || []
-      // rows가 세팅되면 자식이 bind() → adapter 준비 → CUD 콜백 바인딩
     },
     add() {
-      // ID는 JqxCustomeGrid의 addrow 콜백에서 자동 생성
       this.$refs.grd?.add({ name: '', dept: '', role: '' })
     },
     delete() {
@@ -67,10 +64,9 @@ export default {
       console.log(this.$refs.grd?.getChanges())
     },
     saveData() {
-      // 저장시에 변경사항만 가져오기
       const changes = this.$refs.grd?.getChanges()
       console.log('Saving changes:', changes)
-      // 서버에 저장 로직 - 보통 변경사항(CUD)만 전송
+      // TODO: 서버 저장 로직
     },
   },
 }
