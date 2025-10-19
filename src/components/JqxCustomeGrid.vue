@@ -232,12 +232,14 @@ export default {
   color: #052c65 !important;
 }
 
-/* 강제 중앙 정렬 - 첫 번째 컬럼 (상태 컬럼) */
-.jqx-custome-grid :deep(.jqx-grid-cell:first-child) {
-  text-align: center !important;
+/* 상태 아이콘 중앙 정렬 */
+.jqx-custome-grid :deep(.jqs-state-cell) {
+  width: 100% !important;
+  height: 100% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  text-align: center !important;
 }
 
 /* 행 상태별 백그라운드 스타일링 */
