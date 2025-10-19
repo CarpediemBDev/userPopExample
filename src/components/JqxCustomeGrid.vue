@@ -78,22 +78,7 @@ export default {
         align: 'center',
         cellsalign: 'center',
         cellsrenderer: (row, col, val) => {
-          const v = val || ''
-          let icon = ''
-          let colorClass = ''
-
-          if (v === 'A') {
-            icon = '➕'
-            colorClass = 'status-add'
-          } else if (v === 'U') {
-            icon = '✓'
-            colorClass = 'status-update'
-          } else if (v === 'D') {
-            icon = '➖'
-            colorClass = 'status-delete'
-          }
-
-          return `<div class="jqs-state-cell ${colorClass}">${icon}</div>`
+          return `<div class="jqs-state-cell"></div>`
         },
         cellclassname: (row, datafield, value, rowData) => {
           if (rowData.rowStatus === 'A') return 'jqs-row-a'
@@ -252,5 +237,26 @@ export default {
 .jqx-custome-grid :deep(.jqs-row-d) {
   background-color: #fff5f5;
   text-decoration: line-through;
+}
+
+/* A: 추가 => '+' */
+.jqx-custome-grid :deep(.status-add::after),
+.jqx-custome-grid :deep(.jqs-row-a .jqs-state-cell::after) {
+  content: '+';
+  color: #0f766e; /* 텍스트/테두리 */
+}
+
+/* U: 수정 => 'v' */
+.jqx-custome-grid :deep(.status-update::after),
+.jqx-custome-grid :deep(.jqs-row-u .jqs-state-cell::after) {
+  content: '✓';
+  color: #0f766e; /* 텍스트/테두리 */
+}
+
+/* D: 삭제 => '-' */
+.jqx-custome-grid :deep(.status-delete::after),
+.jqx-custome-grid :deep(.jqs-row-d .jqs-state-cell::after) {
+  content: '-';
+  color: #b91c1c;
 }
 </style>
