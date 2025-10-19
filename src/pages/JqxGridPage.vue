@@ -90,7 +90,9 @@ export default {
         alert(
           `저장 완료!\n생성: ${payload.created.length}건\n수정: ${payload.updated.length}건\n삭제: ${payload.deleted.length}건`
         )
-        grid.clearStatuses() // 상태 초기화
+
+        // 서버 저장 완료 후 최신 데이터 재조회 (실제로는 서버에서)
+        await this.loadUsers() // 서버에서 최신 데이터 가져오기
       } catch (error) {
         console.error('저장 실패:', error)
         alert('저장에 실패했습니다.')
