@@ -240,21 +240,18 @@ export default {
 }
 
 /* A: 추가 => '+' */
-.jqx-custome-grid :deep(.status-add::after),
 .jqx-custome-grid :deep(.jqs-row-a .jqs-state-cell::after) {
   content: '+';
   color: #0f766e; /* 텍스트/테두리 */
 }
 
 /* U: 수정 => 'v' */
-.jqx-custome-grid :deep(.status-update::after),
 .jqx-custome-grid :deep(.jqs-row-u .jqs-state-cell::after) {
   content: '✓';
   color: #0f766e; /* 텍스트/테두리 */
 }
 
 /* D: 삭제 => '-' */
-.jqx-custome-grid :deep(.status-delete::after),
 .jqx-custome-grid :deep(.jqs-row-d .jqs-state-cell::after) {
   content: '-';
   color: #b91c1c;
