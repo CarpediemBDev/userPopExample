@@ -121,16 +121,37 @@ export default {
       })
     },
     getChanges() {
-      const added = [],
-        updated = [],
-        deleted = []
-      for (const r of this.localdata) {
-        if (r.rowStatus === 'A') added.push(r)
-        else if (r.rowStatus === 'U') updated.push(r)
-        else if (r.rowStatus === 'D') deleted.push(r)
+      return {
+        added: this.localdata.filter((r) => r.rowStatus === 'A'),
+        updated: this.localdata.filter((r) => r.rowStatus === 'U'),
+        deleted: this.localdata.filter((r) => r.rowStatus === 'D'),
       }
-      return { added, updated, deleted }
     },
+
+    // 서버로 보낼 payload 생성
+    getSavePayload() {
+      const changes = this.getChanges()
+
+      // rowStatus 필드 제거한 순수 데이터
+      const cleanData = (items) =>
+        items.map((item) => {
+          const { rowStatus, ...cleanItem } = item
+          return cleanItem
+        })
+
+      return {
+        created: cleanData(changes.added),
+        updated: cleanData(changes.updated),
+        deleted: cleanData(changes.deleted),
+      }
+    },
+
+    // 변경사항 개수 확인
+    hasChanges() {
+      const changes = this.getChanges()
+      return changes.added.length > 0 || changes.updated.length > 0 || changes.deleted.length > 0
+    },
+
     clearStatuses() {
       this.localdata.forEach((r) => {
         if (r.rowStatus) delete r.rowStatus
