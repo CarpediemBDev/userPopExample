@@ -37,7 +37,7 @@ export default {
     height: { type: [Number, String], default: '100%' },
     theme: { type: String, default: 'bootstrap' },
     editable: { type: Boolean, default: true },
-    selectionmode: { type: String, default: 'checkbox' },
+    selectionmode: { type: String, default: 'singlerow' },
     pageable: { type: Boolean, default: true },
     pagesize: { type: Number, default: 20 },
     pagesizeoptions: { type: Array, default: () => [10, 20, 50, 100] },
@@ -57,9 +57,14 @@ export default {
   computed: {
     // rowStatus 필드 자동 보강
     augmentedDatafields() {
-      return this.datafields.some((f) => f.name === 'rowStatus')
-        ? this.datafields
-        : [...this.datafields, { name: 'rowStatus', type: 'string' }]
+      let fields = [...this.datafields]
+
+      // rowStatus 필드 추가
+      if (!fields.some((f) => f.name === 'rowStatus')) {
+        fields.push({ name: 'rowStatus', type: 'string' })
+      }
+
+      return fields
     },
     columnsOut() {
       if (!this.showRowStatus) return this.columns
@@ -112,14 +117,22 @@ export default {
   methods: {
     // 부모에서 this.$refs.gridComp.add(...) 식으로 호출
     add(initial = {}) {
-      console.log('add called', initial)
       this.$refs.grid.addrow(null, initial)
     },
     deleteSelected() {
-      const idxs = this.$refs.grid.getselectedrowindexes?.() || []
-      idxs.forEach((i) => {
-        const id = this.$refs.grid.getrowid(i)
-        this.$refs.grid.deleterow(id)
+      const selectedIndexes = this.$refs.grid.getselectedrowindexes() || []
+      if (selectedIndexes.length === 0) return
+
+      selectedIndexes.forEach((index) => {
+        if (index >= 0 && index < this.localdata.length) {
+          this.localdata[index] = { ...this.localdata[index], rowStatus: 'D' }
+        }
+      })
+
+      this.source.localdata = this.localdata
+      this.$nextTick(() => {
+        this.$refs.grid?.updatebounddata('cells')
+        this.$refs.grid?.clearselection()
       })
     },
     getChanges() {
@@ -160,16 +173,18 @@ export default {
           })
         },
         updaterow: (rowid, newdata, commit) => {
-          console.log('updaterow callback - rowid:', rowid, 'newdata:', newdata)
           const i = rowid // rowid가 인덱스
           if (i < 0 || i >= this.localdata.length) return commit(false)
 
           // 기존 rowStatus 확인 (새로 추가된 행이면 'A' 유지, 아니면 'U')
           const prevStatus = this.localdata[i].rowStatus
-          this.localdata.splice(i, 1, {
+          const updatedRow = {
             ...newdata,
             rowStatus: prevStatus === 'A' ? 'A' : 'U',
-          })
+          }
+          // 배열의 해당 인덱스 데이터 교체
+          this.localdata.splice(i, 1, updatedRow)
+
           // source.localdata도 동기화
           this.source.localdata = this.localdata
           commit(true)
@@ -178,7 +193,6 @@ export default {
           })
         },
         deleterow: (rowid, rowdata, commit) => {
-          console.log('deleterow callback - rowid:', rowid, 'rowdata:', rowdata)
           const i = rowid // rowid가 인덱스
           if (i < 0 || i >= this.localdata.length) return commit(false)
           // rowdata가 있다면 직접 사용, 없다면 기존 방식

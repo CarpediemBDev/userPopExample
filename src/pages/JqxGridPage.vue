@@ -2,7 +2,7 @@
   <div class="container py-3" style="height: 600px">
     <div class="mb-2 d-flex gap-2">
       <button class="btn btn-primary btn-sm" @click="add">추가</button>
-      <button class="btn btn-outline-danger btn-sm" @click="delete">삭제</button>
+      <button class="btn btn-outline-danger btn-sm" @click="deleteSelected">삭제</button>
       <button class="btn btn-outline-secondary btn-sm" @click="logCUD">변경확인</button>
       <button class="btn btn-success btn-sm" @click="saveData">저장</button>
     </div>
@@ -57,7 +57,7 @@ export default {
     add() {
       this.$refs.grd?.add({ name: '', dept: '', role: '' })
     },
-    delete() {
+    deleteSelected() {
       this.$refs.grd?.deleteSelected()
     },
     logCUD() {
@@ -65,7 +65,6 @@ export default {
     },
     saveData() {
       const changes = this.$refs.grd?.getChanges()
-      console.log('Saving changes:', changes)
       // TODO: 서버 저장 로직
     },
   },
