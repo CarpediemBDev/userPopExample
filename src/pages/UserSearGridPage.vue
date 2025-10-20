@@ -113,29 +113,21 @@
       </div>
     </div>
 
-    <!-- 팝업 -->
-    <UserPopup
-      v-if="showPopup"
-      v-bind="popupProps"
-      @close="showPopup = false"
-      @confirm="onConfirm"
-    />
+    <!-- 팝업 제거 - 헬퍼 함수로 대체 -->
   </div>
 </template>
 
 <script>
-import UserPopup from '../components/UserPopup.vue'
-// SelectedUsers removed for this page
 import SearchGrid from '../components/SearchGrid.vue'
 import { generateMockUsers } from '../utils/generateMockUsers.js'
+import { openUserPopup } from '../utils/showPop.js'
 //import { toastMsg } from '../utils/toastUtil.js'
 
 export default {
   name: 'UserSearGridPage',
-  components: { UserPopup, SearchGrid },
+  components: { SearchGrid },
   data() {
     return {
-      showPopup: false,
       keyword: '',
       sortKey: null, // 'userId' | 'name' | 'dept' | 'role' | null
       sortDir: 'none', // 'none' | 'asc' | 'desc'
@@ -171,19 +163,6 @@ export default {
       const map = new Map(this.users.map((u) => [u.userId, u]))
       return this.checkedIds.map((id) => map.get(id)).filter(Boolean)
     },
-    popupProps() {
-      return {
-        //preselectedIds: this.checkedIds, // 미리 선택된 ID 목록 (팝업 내 체크박스에 반영됨)
-        maxWidth: 960, // 가로폭 상한
-        marginX: 16, // 좌우 여백
-        heightVh: 80, // 화면 높이 대비
-        // 너무 작게 줄어드는 것 방지
-        minHeightPx: 560, // 최소 높이
-        maxHeightPx: 720, // 최대 높이
-        // 드래그 가능 여부 (true로 설정 시 헤더에서 드래그 가능)
-        draggable: true,
-      }
-    },
     allCheckedPage() {
       if (!this.visibleUsers.length) return false
       const set = new Set(this.checkedIds)
@@ -210,31 +189,55 @@ export default {
         this.users = generateMockUsers(100, { seed: 42 })
       }
     },
-    openPopup() {
-      this.showPopup = true
+    async openPopup() {
+      try {
+        // 헬퍼 함수를 사용해서 팝업 열기
+        const selectedList = await openUserPopup({
+          draggable: true,
+        })
+
+        if (selectedList && selectedList.length > 0) {
+          // forward selected users to SearchGrid so it can display names
+          try {
+            const sg = this.$refs.searchGrid
+            if (sg && typeof sg.setUsersFromPopup === 'function') {
+              sg.setUsersFromPopup(selectedList)
+            }
+          } catch (e) {
+            // ignore if ref not available
+          }
+
+          // Add to checkedIds
+          const addIds = selectedList.map((u) => u.userId)
+          const set = new Set(this.checkedIds)
+          for (const id of addIds) {
+            if (!set.has(id)) {
+              this.checkedIds.push(id)
+            }
+          }
+
+          this.$toast(`${selectedList.length}명 추가됨`, {
+            type: 'success',
+            duration: 2000,
+          })
+        }
+      } catch (error) {
+        console.error('팝업 에러:', error)
+        this.$toast('팝업을 여는 중 오류가 발생했습니다', {
+          type: 'error',
+          duration: 3000,
+        })
+      }
     },
     onConfirm(selectedList) {
-      // forward selected users to SearchGrid so it can display names
-      try {
-        const sg = this.$refs.searchGrid
-        if (sg && typeof sg.setUsersFromPopup === 'function') {
-          sg.setUsersFromPopup(selectedList)
-        }
-      } catch (e) {
-        // ignore if ref not available
-      }
-
+      // 이 메서드는 SearchGrid에서 @update:selected 이벤트로 호출됨
       const addIds = selectedList.map((u) => u.userId)
       const set = new Set(this.checkedIds)
-      for (const id of addIds) if (!set.has(id)) this.checkedIds.push(id)
-      this.showPopup = false
-      this.$toast(
-        selectedList.length > 0 ? `${selectedList.length}명 추가됨` : '추가된 항목이 없습니다',
-        {
-          type: selectedList.length > 0 ? 'success' : 'secondary',
-          duration: 1800,
+      for (const id of addIds) {
+        if (!set.has(id)) {
+          this.checkedIds.push(id)
         }
-      )
+      }
     },
     removeSelected(userId) {
       this.checkedIds = this.checkedIds.filter((x) => x !== userId)
