@@ -193,7 +193,7 @@ export default {
       try {
         // 헬퍼 함수를 사용해서 팝업 열기
         const selectedList = await openUserPopup({
-          draggable: true,
+          // 필요한 경우에만 커스텀 옵션 추가
         })
 
         if (selectedList && selectedList.length > 0) {

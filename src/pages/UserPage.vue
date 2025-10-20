@@ -185,7 +185,6 @@ export default {
         // 헬퍼 함수를 사용해서 팝업 열기
         const selectedList = await openUserPopup({
           // preselectedIds: this.checkedIds, // 미리 선택된 ID 목록 (필요시)
-          draggable: true,
         })
 
         // 사용자가 확인을 누른 경우

@@ -63,6 +63,11 @@ class ModalManager {
 
       const instance = app.mount(container)
 
+      // 드래그 기능 설정
+      if (options.draggable) {
+        this.setupDragging(container, options)
+      }
+
       // 모달 정보 저장
       this.modals.set(modalId, {
         app,
@@ -97,6 +102,9 @@ class ModalManager {
     const { app, container, escHandler } = modal
 
     // 정리
+    if (container._dragCleanup) {
+      container._dragCleanup()
+    }
     app.unmount()
     if (document.body.contains(container)) {
       document.body.removeChild(container)
@@ -110,6 +118,78 @@ class ModalManager {
     if (resolve) {
       resolve(result)
     }
+  }
+
+  /**
+   * 모달에 드래그 기능을 설정합니다
+   */
+  setupDragging(container, options) {
+    const dlg = container.querySelector('.modal-dialog')
+    const header = container.querySelector('.modal-header')
+
+    if (!dlg || !header) return
+
+    let dragging = false
+    let dragStart = { x: 0, y: 0 }
+    let dialogStart = { left: 0, top: 0 }
+    const marginX = options.marginX || 16
+
+    // 헤더에 커서 스타일 추가
+    header.style.cursor = 'move'
+
+    const onDragStart = (e) => {
+      if (e.button !== 0) return // 좌클릭만
+      dragging = true
+      const rect = dlg.getBoundingClientRect()
+      dragStart = { x: e.clientX, y: e.clientY }
+      dialogStart = { left: rect.left, top: rect.top }
+      document.body.style.userSelect = 'none'
+    }
+
+    const onDragMove = (e) => {
+      if (!dragging) return
+      e.preventDefault()
+
+      const dx = e.clientX - dragStart.x
+      const dy = e.clientY - dragStart.y
+      const rect = dlg.getBoundingClientRect()
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+
+      let newLeft = dialogStart.left + dx
+      let newTop = dialogStart.top + dy
+
+      // 화면 밖으로 나가지 않도록 제한
+      const maxLeft = vw - rect.width - marginX
+      const maxTop = vh - rect.height - 12
+
+      newLeft = Math.min(Math.max(marginX, newLeft), Math.max(marginX, maxLeft))
+      newTop = Math.min(Math.max(12, newTop), Math.max(12, maxTop))
+
+      dlg.style.left = `${newLeft}px`
+      dlg.style.top = `${newTop}px`
+    }
+
+    const onDragEnd = () => {
+      if (!dragging) return
+      dragging = false
+      document.body.style.userSelect = ''
+    }
+
+    // 이벤트 리스너 등록
+    header.addEventListener('pointerdown', onDragStart)
+    window.addEventListener('pointermove', onDragMove, { passive: false })
+    window.addEventListener('pointerup', onDragEnd, { passive: true })
+
+    // 정리를 위해 리스너들을 저장
+    const cleanup = () => {
+      header.removeEventListener('pointerdown', onDragStart)
+      window.removeEventListener('pointermove', onDragMove)
+      window.removeEventListener('pointerup', onDragEnd)
+    }
+
+    // container에 정리 함수 저장
+    container._dragCleanup = cleanup
   }
 
   /**
