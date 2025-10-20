@@ -1,6 +1,6 @@
 <!-- NavBar.vue -->
 <template>
-  <header>
+  <div>
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
       <div class="container-fluid">
         <a class="navbar-brand fw-semibold" href="#">userPopExample</a>
@@ -118,7 +118,7 @@
         </div>
       </div>
     </div>
-  </header>
+  </div>
 </template>
 
 <script>
