@@ -52,21 +52,21 @@ export default {
   data() {
     return {
       transitionName: 'slide-right',
-      routeHistory: []
+      routeHistory: [],
     }
   },
   watch: {
     $route(to, from) {
       const currentPath = to.path
       const fromPath = from.path
-      
+
       console.log('Route change:', fromPath, '→', currentPath)
       console.log('History before:', this.routeHistory)
-      
+
       // 현재 히스토리에서 이전 페이지가 바로 직전에 있는지 확인
       const prevIndex = this.routeHistory.length - 2
       const isGoingBack = prevIndex >= 0 && this.routeHistory[prevIndex] === currentPath
-      
+
       if (isGoingBack) {
         // 뒤로가기: 마지막 항목 제거
         this.routeHistory.pop()
@@ -75,10 +75,10 @@ export default {
       } else {
         // 앞으로 이동: 새 경로 추가
         this.routeHistory.push(currentPath)
-        this.transitionName = 'slide-right' 
+        this.transitionName = 'slide-right'
         console.log('Going forward, transition: slide-right')
       }
-      
+
       console.log('History after:', this.routeHistory)
     },
   },
