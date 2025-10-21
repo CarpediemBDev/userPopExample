@@ -5,17 +5,30 @@
       <div class="container-fluid">
         <a class="navbar-brand fw-semibold" href="#">userPopExample</a>
 
-        <!-- 모바일: 오프캔버스 토글 -->
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#navDrawer"
-          aria-controls="navDrawer"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- 모바일: 뒤로가기 + 햄버거 메뉴 -->
+        <div class="d-flex d-lg-none align-items-center gap-2">
+          <!-- 뒤로가기 버튼 (모바일에서만 표시) -->
+          <button
+            v-if="canGoBack"
+            class="btn btn-outline-secondary btn-sm"
+            @click="goBack"
+            aria-label="뒤로가기"
+          >
+            <i class="bi bi-arrow-left"></i>
+          </button>
+
+          <!-- 햄버거 메뉴 버튼 -->
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#navDrawer"
+            aria-controls="navDrawer"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
 
         <!-- 데스크톱: 드롭다운 2단 -->
         <div class="navbar-collapse d-none d-lg-flex">
@@ -55,7 +68,7 @@
           <RouterLink
             to="/"
             class="btn btn-sm btn-outline-secondary"
-            data-bs-dismiss="offcanvas"
+            @click="closeOffcanvas"
             aria-label="홈으로 이동"
           >
             <i class="bi bi-house"></i>
@@ -106,7 +119,7 @@
                     v-if="item.to"
                     :to="item.to"
                     class="text-decoration-none d-block"
-                    data-bs-dismiss="offcanvas"
+                    @click="closeOffcanvas"
                   >
                     {{ item.label }}
                   </RouterLink>
@@ -130,6 +143,7 @@ export default {
   data() {
     return {
       user: { name: '홍길동', email: 'hong@example.com' },
+      canGoBack: false,
       // 중간 '사용자 목록' 단계 없이 바로 라우트 연결
       menu: [
         {
@@ -153,13 +167,47 @@ export default {
       ],
     }
   },
+  mounted() {
+    // 히스토리 상태 체크
+    this.checkBackButton()
+
+    // popstate 이벤트로 뒤로가기 버튼 상태 업데이트
+    window.addEventListener('popstate', this.checkBackButton)
+  },
+  beforeUnmount() {
+    window.removeEventListener('popstate', this.checkBackButton)
+  },
+  watch: {
+    $route() {
+      // 라우트 변경 시 뒤로가기 버튼 상태 체크
+      this.$nextTick(this.checkBackButton)
+    },
+  },
   methods: {
+    checkBackButton() {
+      // 브라우저 히스토리에 이전 페이지가 있는지 확인
+      this.canGoBack = window.history.length > 1
+    },
+    goBack() {
+      // 뒤로가기 실행
+      if (this.canGoBack) {
+        this.$router.go(-1)
+      }
+    },
+    closeOffcanvas() {
+      // Bootstrap 오프캔버스 수동으로 닫기
+      const offcanvasElement = document.getElementById('navDrawer')
+      if (offcanvasElement) {
+        const offcanvas = window.bootstrap?.Offcanvas?.getInstance(offcanvasElement)
+        if (offcanvas) {
+          offcanvas.hide()
+        }
+      }
+    },
     onSignOut() {
       // TODO: 실제 로그아웃 로직(토큰 삭제, 세션 종료, API 호출 등) 구현
       // 예: localStorage.removeItem('token')
-      // 예: await api.post('/auth/logout')
-      // 이동
-      if (this.$router) this.$router.push('/login')
+      alert('로그아웃 기능은 아직 구현되지 않았습니다.')
     },
   },
 }

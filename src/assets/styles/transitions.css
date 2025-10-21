@@ -46,3 +46,27 @@
   transform: translateY(-30px);
   opacity: 0;
 }
+
+/* 양방향 슬라이드 - 앞으로 이동 (오른쪽에서 들어옴) */
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.3s ease;
+}
+.slide-right-enter-from {
+  transform: translateX(100%); /* 오른쪽에서 들어옴 */
+}
+.slide-right-leave-to {
+  transform: translateX(-100%); /* 왼쪽으로 나감 */
+}
+
+/* 양방향 슬라이드 - 뒤로 이동 (왼쪽에서 들어옴) */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.3s ease;
+}
+.slide-left-enter-from {
+  transform: translateX(-100%); /* 왼쪽에서 들어옴 */
+}
+.slide-left-leave-to {
+  transform: translateX(100%); /* 오른쪽으로 나감 */
+}
