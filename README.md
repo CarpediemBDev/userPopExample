@@ -1,6 +1,77 @@
-# userPopExample
+# userPopExample - Full Stack Application
 
-Vue 3 + Bootstrap 5 + JqWidgets를 사용한 사용자 관리 시스템 예제입니다.
+Vue 3 + Express.js를 활용한 사용자 관리 시스템
+
+## 🏗️ 프로젝트 구조
+
+```
+userPopExample/
+├── frontend/          # Vue 3 프론트엔드
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.js
+├── backend/           # Express.js 백엔드
+│   ├── src/
+│   ├── package.json
+│   └── .env
+└── README.md
+```
+
+## 🚀 개발 환경 설정
+
+### Frontend 실행
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Backend 실행  
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+## 🛠️ 기술 스택
+
+### Frontend
+- Vue 3 (Options API)
+- Vue Router 4
+- Bootstrap 5
+- JqWidgets
+- Vite
+
+### Backend
+- Node.js
+- Express.js
+- JWT 인증
+- MySQL
+- bcrypt
+
+## 📋 주요 기능
+
+- [x] 사용자 관리 UI
+- [x] 반응형 디자인
+- [x] 모달 시스템
+- [x] 페이지 전환 애니메이션
+- [ ] JWT 인증/인가
+- [ ] 사용자 CRUD API
+- [ ] 메뉴 권한 관리
+- [ ] 데이터베이스 연동
+
+## 🔧 개발 가이드
+
+### 포트 설정
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3001
+
+### API 엔드포인트
+- `GET /api/health` - 서버 상태 확인
+- `POST /api/auth/login` - 로그인
+- `GET /api/users` - 사용자 목록
+- `GET /api/menu` - 메뉴 데이터
 
 ## 🚀 빠른 시작
 
