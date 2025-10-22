@@ -3,32 +3,33 @@
   <div>
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
       <div class="container-fluid">
-        <a class="navbar-brand fw-semibold" href="#">userPopExample</a>
-
-        <!-- 모바일: 뒤로가기 + 햄버거 메뉴 -->
-        <div class="d-flex d-lg-none align-items-center gap-2">
-          <!-- 뒤로가기 버튼 (모바일에서만 표시) -->
+        <!-- 모바일: 뒤로가기 버튼 (브랜드 위치에) -->
+        <div class="d-flex d-lg-none align-items-center">
           <button
             v-if="canGoBack"
-            class="btn btn-outline-secondary btn-sm"
+            class="btn btn-outline-secondary btn-sm me-2"
             @click="goBack"
             aria-label="뒤로가기"
           >
             <i class="bi bi-arrow-left"></i>
           </button>
-
-          <!-- 햄버거 메뉴 버튼 -->
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#navDrawer"
-            aria-controls="navDrawer"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
+          <span class="navbar-brand fw-semibold mb-0">userPopExample</span>
         </div>
+
+        <!-- 데스크톱: 일반 브랜드 -->
+        <a class="navbar-brand fw-semibold d-none d-lg-block" href="#">userPopExample</a>
+
+        <!-- 모바일: 햄버거 메뉴만 -->
+        <button
+          class="navbar-toggler d-lg-none"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#navDrawer"
+          aria-controls="navDrawer"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
         <!-- 데스크톱: 드롭다운 2단 -->
         <div class="navbar-collapse d-none d-lg-flex">
