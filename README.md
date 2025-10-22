@@ -18,60 +18,101 @@ userPopExample/
 └── README.md
 ```
 
-## 🚀 개발 환경 설정
+# userPopExample - Full Stack Application
 
-### Frontend 실행
+Vue 3 + Express.js를 활용한 사용자 관리 시스템
+
+## 🏗️ 프로젝트 구조
+
+```
+userPopExample/
+├── frontend/          # 🎨 Vue 3 프론트엔드
+│   ├── src/          # 소스 코드
+│   ├── public/       # 정적 파일
+│   └── README.md     # Frontend 개발 가이드
+├── backend/           # 🚀 Express.js 백엔드
+│   ├── src/          # API 서버 코드
+│   └── README.md     # Backend API 문서
+└── README.md         # 프로젝트 개요 (현재 파일)
+```
+
+## 🚀 빠른 시작
+
+### 1. Frontend 실행
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run make:db        # 목업 데이터 생성
+npm run dev           # http://localhost:5173
 ```
 
-### Backend 실행  
+### 2. Backend 실행  
 ```bash
 cd backend
 npm install
-npm run dev
+cp .env.example .env  # 환경 변수 설정
+npm run dev          # http://localhost:3001
 ```
 
 ## 🛠️ 기술 스택
 
-### Frontend
-- Vue 3 (Options API)
-- Vue Router 4
-- Bootstrap 5
-- JqWidgets
-- Vite
+| Frontend | Backend | Database |
+|----------|---------|----------|
+| Vue 3 | Express.js | MySQL |
+| Vue Router 4 | JWT 인증 | |
+| Bootstrap 5 | bcrypt | |
+| JqWidgets | helmet, cors | |
+| Vite | nodemon | |
 
-### Backend
-- Node.js
-- Express.js
-- JWT 인증
-- MySQL
-- bcrypt
+## 📋 개발 진행 상황
 
-## 📋 주요 기능
-
-- [x] 사용자 관리 UI
-- [x] 반응형 디자인
-- [x] 모달 시스템
+### ✅ 완료된 기능
+- [x] 사용자 관리 UI (Vue 3)
+- [x] 반응형 디자인 (Bootstrap 5)
+- [x] 모달 시스템 (드래그 지원)
 - [x] 페이지 전환 애니메이션
-- [ ] JWT 인증/인가
+- [x] 모바일 네비게이션 (햄버거 메뉴)
+- [x] Backend 프로젝트 구조
+
+### 🚧 진행 중인 작업
+- [ ] JWT 인증/인가 구현
 - [ ] 사용자 CRUD API
 - [ ] 메뉴 권한 관리
 - [ ] 데이터베이스 연동
+- [ ] Frontend-Backend 통합
 
-## 🔧 개발 가이드
+## 🔧 개발 환경 정보
 
 ### 포트 설정
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3001
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:3001
 
 ### API 엔드포인트
 - `GET /api/health` - 서버 상태 확인
 - `POST /api/auth/login` - 로그인
 - `GET /api/users` - 사용자 목록
 - `GET /api/menu` - 메뉴 데이터
+
+## 📚 상세 문서
+
+- **Frontend 가이드**: [`frontend/README.md`](./frontend/README.md)
+- **Backend API 문서**: [`backend/README.md`](./backend/README.md)
+
+## 🌐 라이브 데모
+
+- **Frontend**: [배포 URL 예정]
+- **API 문서**: [Swagger 문서 예정]
+
+## 🤝 기여 가이드
+
+1. Feature 브랜치 생성: `git checkout -b feature/new-feature`
+2. 변경사항 커밋: `git commit -m "feat: add new feature"`  
+3. 브랜치 푸시: `git push origin feature/new-feature`
+4. Pull Request 생성
+
+## 📄 라이센스
+
+MIT License
 
 ## 🚀 빠른 시작
 
