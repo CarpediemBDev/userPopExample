@@ -36,7 +36,7 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: userPopExampleSecretKeyForJWTTokenGeneration2024
+  secret: NexHubStudioSecretKeyForJWTTokenGeneration2024
   expiration: 86400000 # 24 hours in milliseconds
 
 # CORS Configuration
@@ -48,5 +48,5 @@ cors:
 # Logging
 logging:
   level:
-    com.userpopexample: DEBUG
+  com.nexhubstudio: DEBUG
     org.springframework.security: DEBUG
