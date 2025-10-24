@@ -39,6 +39,7 @@ userPopExample/
 ## 🚀 빠른 시작
 
 ### 1. Frontend 실행
+
 ```bash
 cd frontend
 npm install
@@ -46,7 +47,8 @@ npm run make:db        # 목업 데이터 생성
 npm run dev           # http://localhost:5173
 ```
 
-### 2. Backend 실행  
+### 2. Backend 실행
+
 ```bash
 cd backend
 npm install
@@ -56,17 +58,18 @@ npm run dev          # http://localhost:3001
 
 ## 🛠️ 기술 스택
 
-| Frontend | Backend | Database |
-|----------|---------|----------|
-| Vue 3 | Express.js | MySQL |
-| Vue Router 4 | JWT 인증 | |
-| Bootstrap 5 | bcrypt | |
-| JqWidgets | helmet, cors | |
-| Vite | nodemon | |
+| Frontend     | Backend      | Database |
+| ------------ | ------------ | -------- |
+| Vue 3        | Express.js   | MySQL    |
+| Vue Router 4 | JWT 인증     |          |
+| Bootstrap 5  | bcrypt       |          |
+| JqWidgets    | helmet, cors |          |
+| Vite         | nodemon      |          |
 
 ## 📋 개발 진행 상황
 
 ### ✅ 완료된 기능
+
 - [x] 사용자 관리 UI (Vue 3)
 - [x] 반응형 디자인 (Bootstrap 5)
 - [x] 모달 시스템 (드래그 지원)
@@ -75,6 +78,7 @@ npm run dev          # http://localhost:3001
 - [x] Backend 프로젝트 구조
 
 ### 🚧 진행 중인 작업
+
 - [ ] JWT 인증/인가 구현
 - [ ] 사용자 CRUD API
 - [ ] 메뉴 권한 관리
@@ -84,10 +88,12 @@ npm run dev          # http://localhost:3001
 ## 🔧 개발 환경 정보
 
 ### 포트 설정
+
 - **Frontend**: http://localhost:5173
 - **Backend**: http://localhost:3001
 
 ### API 엔드포인트
+
 - `GET /api/health` - 서버 상태 확인
 - `POST /api/auth/login` - 로그인
 - `GET /api/users` - 사용자 목록
@@ -106,7 +112,7 @@ npm run dev          # http://localhost:3001
 ## 🤝 기여 가이드
 
 1. Feature 브랜치 생성: `git checkout -b feature/new-feature`
-2. 변경사항 커밋: `git commit -m "feat: add new feature"`  
+2. 변경사항 커밋: `git commit -m "feat: add new feature"`
 3. 브랜치 푸시: `git push origin feature/new-feature`
 4. Pull Request 생성
 
