@@ -48,5 +48,5 @@ cors:
 # Logging
 logging:
   level:
-  com.nexhubstudio: DEBUG
+    com.nexhubstudio: DEBUG
     org.springframework.security: DEBUG
