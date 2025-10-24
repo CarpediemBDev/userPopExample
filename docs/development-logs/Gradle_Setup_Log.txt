@@ -72,14 +72,14 @@
 
 참고 자료: https://velog.io/@ryuneng2/.java-is-a-non-project-file-only-syntax-errors-are-reported-%EC%98%A4%EB%A5%98-%ED%95%B4%EA%B2%B0%EB%B0%A9%EB%B2%95
 
-결과: UserPopExampleApplication.java 파일이 정상적으로 인식됨
+결과: NexHubStudioApplication.java 파일이 정상적으로 인식됨
 ```
 
 ### 5단계: Spring Boot 실행 성공! 🎉
 <!-- ✅ COMPLETED: 드디어 서버 실행 성공! -->
 ```
 실행 방법:
-- UserPopExampleApplication.java 파일에서 직접 Run 버튼 클릭
+- NexHubStudioApplication.java 파일에서 직접 Run 버튼 클릭
 - VS Code의 Java Extension이 자동으로 Gradle 프로젝트 인식
 - 의존성 자동 다운로드 및 컴파일 수행
 
@@ -99,8 +99,8 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.0)
 
-[INFO] Starting UserPopExampleApplication...
-[INFO] Started UserPopExampleApplication in X.X seconds
+[INFO] Starting NexHubStudioApplication...
+[INFO] Started NexHubStudioApplication in X.X seconds
 ```
 
 ### 6단계: API 테스트 성공! ✅

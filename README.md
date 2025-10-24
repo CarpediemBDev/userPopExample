@@ -1,11 +1,11 @@
-# userPopExample - Full Stack Application
+# NexHubStudio - Full Stack Application
 
 Vue 3 + Express.js를 활용한 사용자 관리 시스템
 
 ## 🏗️ 프로젝트 구조
 
 ```
-userPopExample/
+NexHubStudio/
 ├── frontend/          # Vue 3 프론트엔드
 │   ├── src/
 │   ├── public/
@@ -18,14 +18,14 @@ userPopExample/
 └── README.md
 ```
 
-# userPopExample - Full Stack Application
+# NexHubStudio - Full Stack Application
 
 Vue 3 + Express.js를 활용한 사용자 관리 시스템
 
 ## 🏗️ 프로젝트 구조
 
 ```
-userPopExample/
+NexHubStudio/
 ├── frontend/          # 🎨 Vue 3 프론트엔드
 │   ├── src/          # 소스 코드
 │   ├── public/       # 정적 파일

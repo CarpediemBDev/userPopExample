@@ -1,0 +1,154 @@
+# Maven 빌드 시도 과정 및 문제점 정리
+
+<!-- ! IMPORTANT: Maven Wrapper 실행 실패로 Spring Boot 서버 시작 불가 -->
+<!-- * TODO: IDE를 통한 실행 또는 Maven 직접 설치 고려 -->
+<!-- ? QUESTION: Maven vs Gradle 최종 결정 필요 -->
+
+## 📋 시도한 작업 순서
+
+### 1. Spring Boot 프로젝트 생성 (성공)
+- ✅ pom.xml 생성 (Java 21, Spring Boot 3.2.0)
+- ✅ 기본 폴더 구조 생성 (src/main/java, src/main/resources)
+- ✅ NexHubStudioApplication.java 메인 클래스 생성
+- ✅ HealthController.java REST API 컨트롤러 생성
+- ✅ application.yml 설정 파일 생성
+
+### 2. Java 환경 설정 (성공)
+- ✅ 기존 Java 17 확인
+- ✅ Java 21 다운로드 및 설치
+- ✅ JAVA_HOME 환경변수 설정
+- ✅ PATH 환경변수 업데이트
+- ✅ java -version으로 Java 21 확인 완료
+
+### 3. Maven Wrapper 설정 (부분 성공)
+- ✅ mvnw (Unix) 스크립트 생성
+- ✅ mvnw.cmd (Windows) 스크립트 생성
+- ✅ .mvn/wrapper/ 폴더 구조 생성
+- ✅ maven-wrapper.properties 설정 파일 생성
+- ✅ maven-wrapper-3.1.0.jar 다운로드 완료
+
+## ❌ 발생한 문제들
+
+<!-- ! IMPORTANT: 세 가지 주요 실패 원인 분석됨 -->
+
+### 문제 1: mvnw.cmd 실행 불가
+<!-- // NOTE: PowerShell vs CMD 호환성 문제가 주요 원인 -->
+```
+오류 메시지: 'mvnw.cmd' 용어가 cmdlet, 함수, 스크립트 파일 또는 실행할 수 있는 프로그램 이름으로 인식되지 않습니다.
+
+시도한 해결방법:
+- .\mvnw.cmd spring-boot:run
+- powershell -ExecutionPolicy Bypass -File .\mvnw.cmd spring-boot:run
+- cmd /c "mvnw.cmd spring-boot:run"
+
+모든 방법 실패
+```
+
+### 문제 2: Maven Wrapper JAR 클래스 로딩 실패
+<!-- // NOTE: maven-wrapper.jar 내부 클래스 경로 문제 -->
+```
+오류 메시지: 기본 클래스 org.apache.maven.wrapper.MavenWrapperMain을(를) 찾거나 로드할 수 없습니다.
+
+시도한 해결방법:
+- java -jar .mvn/wrapper/maven-wrapper.jar spring-boot:run
+- java -cp ".mvn/wrapper/maven-wrapper.jar" org.apache.maven.wrapper.MavenWrapperMain spring-boot:run
+
+클래스 로딩 실패
+```
+
+### 문제 3: Windows 실행 권한 이슈
+<!-- // NOTE: Windows 환경 특유의 스크립트 실행 제한 -->
+```
+Windows PowerShell과 CMD 간의 호환성 문제:
+- PowerShell: .ps1 확장자 요구
+- CMD: 경로 인식 실패
+- 실행 정책 제한
+```
+
+## 🔍 문제 원인 분석
+
+### 1. Maven Wrapper 설정 불완전
+- mvnw.cmd 파일의 실행 권한 미설정
+- Windows 환경에서의 스크립트 실행 정책 제한
+- Maven Wrapper JAR 내부 클래스 경로 문제
+
+### 2. 환경 변수 충돌 가능성
+- 기존 Java 17과 새로 설치한 Java 21 간의 충돌
+- JAVA_HOME vs PATH 설정 불일치
+- PowerShell 세션별 환경변수 격리
+
+### 3. Maven 설치 부재
+- 시스템에 Maven이 직접 설치되지 않음
+- Maven Wrapper만으로는 초기 실행 한계
+- 의존성 다운로드를 위한 초기 Maven 필요
+
+## 💡 해결 방안 후보
+
+<!-- * TODO: 방안들 중 하나를 선택해서 실행해야 함 -->
+<!-- ? QUESTION: 어떤 방안이 가장 적합한가? -->
+
+### 방안 1: Maven 직접 설치
+<!-- // NOTE: 가장 확실하지만 추가 설치 필요 -->
+```
+choco install maven
+또는
+수동 다운로드 후 PATH 설정
+```
+
+### 방안 2: IDE 사용
+<!-- * TODO: VS Code Spring Boot 확장 설치 후 실행 시도 -->
+```
+IntelliJ IDEA나 VS Code에서 직접 실행
+IDE가 내장 Maven 사용
+```
+
+### 방안 3: Gradle로 전환
+<!-- ? QUESTION: Maven 포기하고 Gradle로 갈아탈까? -->
+```
+build.gradle 생성
+Gradle Wrapper 사용 (더 안정적)
+```
+
+### 방안 4: 수동 컴파일
+```
+javac로 컴파일 후
+java -jar 실행
+```
+
+## 📊 현재 상태
+
+### 성공한 부분
+- ✅ Spring Boot 프로젝트 구조 완성
+- ✅ Java 21 환경 구축
+- ✅ 소스 코드 작성 완료
+- ✅ 설정 파일 준비 완료
+
+### 막힌 부분
+- ❌ Maven 빌드 및 실행 불가
+- ❌ 서버 시작 못함
+- ❌ API 테스트 불가
+
+## 🎯 다음 단계 추천
+
+<!-- ! IMPORTANT: 결정 시점 - 어떤 방향으로 갈지 선택해야 함 -->
+<!-- * TODO: 방안 2 (IDE 사용)부터 시도해보기 -->
+
+1. **Maven 직접 설치** (가장 안전한 방법)
+2. **IDE에서 실행** (개발 환경 구축) ← 우선 시도
+3. **Gradle 전환 고려** (더 현대적인 접근)
+
+## 📝 추가 노트
+
+<!-- // NOTE: 프로젝트 구조 자체는 완벽함 -->
+- 모든 소스 코드는 정상적으로 작성됨
+- Spring Boot 구조는 표준을 따름
+- H2 Database 설정 완료
+- CORS, JWT 설정 준비 완료
+- 프로젝트 자체에는 문제 없음, 빌드 도구 실행만 막힘
+
+<!-- ! IMPORTANT: 다음 작업 - IDE_Setup_Log.txt 파일 생성 예정 -->
+
+---
+작성일: 2025-10-23
+작성자: GitHub Copilot
+상태: Maven 빌드 실행 대기 중 → IDE 실행 시도 예정

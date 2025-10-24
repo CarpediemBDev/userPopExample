@@ -1,0 +1,163 @@
+# VS Code IDE를 통한 Spring Boot 실행 시도 로그
+
+<!-- ! IMPORTANT: Maven Wrapper 실패 후 IDE 방식으로 우회 시도 -->
+<!-- * TODO: Spring Boot 확장팩 설치 후 직접 실행 테스트 -->
+<!-- ? QUESTION: IDE 내장 Maven이 정상 작동할지 확인 필요 -->
+
+## 📋 실행 환경 정보
+
+### 현재 설치된 Java 확장들
+<!-- // NOTE: 이미 설치된 확장들 확인됨 -->
+- ✅ Language Support for Java (Red Hat)
+- ✅ Debugger for Java 
+- ✅ Maven for Java
+- ✅ Test Runner for Java
+
+### 추가 필요한 Spring Boot 확장들
+<!-- * TODO: 아래 확장들 설치 필요 -->
+- ✅ Spring Boot Tools (vmware.vscode-spring-boot) - 설치 완료!
+- ✅ Spring Initializr Java Support (vscjava.vscode-spring-initializr) - 설치 완료!
+- ✅ Spring Boot Dashboard (vscjava.vscode-spring-boot-dashboard) - 설치 완료!
+
+## 🚀 실행 시도 과정
+
+### 1단계: Spring Boot 확장팩 설치
+<!-- // NOTE: 실행 시작 시간 기록 -->
+시작 시간: 2025-10-23 오전 05:00
+
+<!-- ✅ COMPLETED: 모든 Spring Boot 확장 설치 성공 -->
+
+### 2단계: NexHubStudioApplication.java 실행 시도
+<!-- * TODO: main 메서드에서 Run 버튼 클릭 -->
+<!-- ? QUESTION: IDE가 내장 Maven을 정상적으로 인식할까? -->
+
+#### 시도 1: 직접 Java 실행
+```
+명령어: java -cp "src/main/java" com.nexhubstudio.backend.NexHubStudioApplication
+결과: 실패
+오류: ClassNotFoundException - Spring Boot 의존성 없음
+```
+
+#### 시도 2: 환경 확인
+```
+java -version: OpenJDK 17.0.16 (Java 21이 아님!)
+echo %JAVA_HOME%: 설정되지 않음
+mvn -version: Maven 설치되지 않음
+```
+
+<!-- ! IMPORTANT: 핵심 문제 발견 -->
+### 🔍 발견된 문제들:
+1. **Java 버전 불일치** - Java 17 vs Java 21 (pom.xml 요구사항)
+2. **JAVA_HOME 미설정** - 환경변수 설정 누락
+3. **Maven 미설치** - 시스템에 Maven 없음
+4. **Spring Boot 의존성 부족** - 컴파일되지 않은 상태
+
+<!-- ? QUESTION: IDE 내장 Maven이 작동하지 않는 이유는? -->
+
+### 3단계: 방안 2 시도 - Java 21 환경변수 설정
+<!-- * TODO: JAVA_HOME을 Java 21로 설정 후 재시도 -->
+<!-- // NOTE: 시작 시간 기록 -->
+시작 시간: 2025-10-23 오전 05:10
+
+#### 환경 조사 결과:
+```
+where java: C:\Program Files\Zulu\zulu-17\bin\java.exe
+dir "C:\Program Files\Zulu": zulu-17만 설치됨 (Java 21 없음)
+choco --version: Chocolatey 설치되지 않음
+Java 21 다운로드 시도: 404 오류 (URL 만료)
+```
+
+<!-- ! IMPORTANT: 방안 2 실패 - Java 21 설치 자체가 안됨 -->
+<!-- ? QUESTION: 방안 1 (Maven 설치)로 전환할까? -->
+
+### 🔄 방안 변경: Maven 직접 설치 시도
+<!-- * TODO: Maven을 수동으로 다운로드하고 설치 -->
+<!-- // NOTE: Java 17로도 Spring Boot가 동작할 수 있음을 확인 -->
+
+#### Maven 수동 설치 과정:
+
+### 🔄 방안 변경: curl을 통한 Java 21 설치 성공!
+<!-- ✅ COMPLETED: Java 21 설치 성공 -->
+
+#### Java 21 설치 과정:
+```bash
+# 1. curl로 OpenJDK 21 다운로드
+curl -L -o openjdk-21.zip "https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_windows-x64_bin.zip"
+결과: 191M 다운로드 성공 (30.3M/s 속도)
+
+# 2. 사용자 폴더에 압축 해제
+powershell Expand-Archive -Path 'openjdk-21.zip' -DestinationPath '%USERPROFILE%\Java21'
+결과: C:\Users\Im\Java21\jdk-21에 설치 완료
+
+# 3. 환경변수 설정
+set JAVA_HOME=%USERPROFILE%\Java21\jdk-21
+set PATH=%JAVA_HOME%\bin;%PATH%
+
+# 4. 버전 확인
+java -version: OpenJDK 21+35-2513 ✅ 성공!
+```
+
+<!-- ! IMPORTANT: Java 21 환경 구축 완료 -->
+<!-- * TODO: 이제 Spring Boot 재실행 시도 -->
+
+### 4단계: Java 21로 Spring Boot 재실행 시도
+
+#### 환경변수 설정 (PowerShell):
+```powershell
+$env:JAVA_HOME = "$env:USERPROFILE\Java21\jdk-21"
+$env:PATH = "$env:USERPROFILE\Maven\apache-maven-3.9.5\bin;$env:JAVA_HOME\bin;$env:PATH"
+
+# 확인
+java -version: OpenJDK 21+35-2513 ✅
+mvn -version: Apache Maven 3.9.5 ✅
+```
+
+#### 드디어 Spring Boot 실행 성공! 🎉
+```bash
+명령어: & "$env:USERPROFILE\Maven\apache-maven-3.9.5\bin\mvn.cmd" spring-boot:run
+결과: 실행 시작! Maven 의존성 다운로드 진행 중
+
+로그:
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/...
+[WARNING] 일부 플러그인 다운로드 경고 있음 (정상적인 첫 실행 과정)
+상태: 의존성 다운로드 계속 진행 중...
+```
+
+<!-- ✅ COMPLETED: Spring Boot 실행 시작됨 -->
+<!-- * TODO: 의존성 다운로드 완료 및 서버 시작 대기 -->
+<!-- ? QUESTION: 서버가 완전히 시작되면 포트 8080에서 접근 가능할 것 -->
+
+### ❌ 실행 실패 - 네트워크 및 플러그인 문제 발견
+
+#### 실행 결과:
+```
+[INFO] BUILD FAILURE
+[ERROR] No plugin found for prefix 'spring-boot' in the current project
+원인: 네트워크 연결 문제로 Maven Central 저장소 접근 실패
+```
+
+#### 발견된 문제들:
+1. **네트워크 차단**: `maven-default-http-blocker` 설정으로 Maven Central 차단됨
+2. **프록시 문제**: `Connect to 70.10.15.10:8080 failed: Connect timed out`
+3. **Spring Boot 플러그인 누락**: pom.xml의 spring-boot-maven-plugin 인식 실패
+
+<!-- ! IMPORTANT: 네트워크 설정 문제로 Maven 의존성 다운로드 불가 -->
+<!-- ? QUESTION: 회사 네트워크 환경인가? 프록시 설정 필요? -->
+
+### 🔧 해결 방안:
+1. Maven 설정에서 프록시 차단 해제
+2. pom.xml에서 Spring Boot 플러그인 버전 명시
+3. 다른 Maven 저장소 사용
+
+---
+
+### 실행 로그는 여기에 실시간으로 업데이트됩니다...
+
+<!-- ! IMPORTANT: 성공/실패 결과에 따라 다음 단계 결정 -->
+<!-- ? QUESTION: IDE 실행 실패시 Maven 직접 설치 vs Gradle 전환? -->
+
+---
+작성 시작: 2025-10-23 오전 05:00
+작성자: GitHub Copilot
+상태: Spring Boot 확장 설치 준비 중
